@@ -3,50 +3,53 @@
 <head>
   <meta charset="utf-8">
   
-  <title>maven入门 | XieZefan&#39;s Blog</title>
+  <title>sleep(), wait()的区别 | XieZefan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="下载
-http://maven.apache.org/download.html
-配置
-MAVEN_HOME : D:\apache-maven-3.0.2  
-MAVEN : %MAVEN_HOME%\bin   
-(可选） MAVEN_OPTS : -Xms256m -Xmx512m
-PATH: 添加 %MAVEN%
-开始
-验证安装成功
-mvn -version
-正常应该显示  
-Apache">
+  <meta name="description" content="sleep(), wait()的区别
+sleep(milliseconds)
+接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
+
+不释放同步锁。
+
+wait()
+调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
+
+释放同步锁
+
+总结
+其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
 <meta property="og:type" content="article">
-<meta property="og:title" content="maven入门">
-<meta property="og:url" content="http://yoursite.com/2014/10/03/2014-05-13-maven-start/">
+<meta property="og:title" content="sleep(), wait()的区别">
+<meta property="og:url" content="http://yoursite.com/2014/10/05/2014-05-19-sleep-wait-diff/">
 <meta property="og:site_name" content="XieZefan's Blog">
-<meta property="og:description" content="下载
-http://maven.apache.org/download.html
-配置
-MAVEN_HOME : D:\apache-maven-3.0.2  
-MAVEN : %MAVEN_HOME%\bin   
-(可选） MAVEN_OPTS : -Xms256m -Xmx512m
-PATH: 添加 %MAVEN%
-开始
-验证安装成功
-mvn -version
-正常应该显示  
-Apache">
+<meta property="og:description" content="sleep(), wait()的区别
+sleep(milliseconds)
+接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
+
+不释放同步锁。
+
+wait()
+调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
+
+释放同步锁
+
+总结
+其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="maven入门">
-<meta name="twitter:description" content="下载
-http://maven.apache.org/download.html
-配置
-MAVEN_HOME : D:\apache-maven-3.0.2  
-MAVEN : %MAVEN_HOME%\bin   
-(可选） MAVEN_OPTS : -Xms256m -Xmx512m
-PATH: 添加 %MAVEN%
-开始
-验证安装成功
-mvn -version
-正常应该显示  
-Apache">
+<meta name="twitter:title" content="sleep(), wait()的区别">
+<meta name="twitter:description" content="sleep(), wait()的区别
+sleep(milliseconds)
+接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
+
+不释放同步锁。
+
+wait()
+调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
+
+释放同步锁
+
+总结
+其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
 
   
     <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
@@ -93,6 +96,8 @@ Apache">
 			        
 						<li><a href="/archives">所有文章</a></li>
 			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
 					</ul>
 				</nav>
 				<nav class="header-nav">
@@ -109,7 +114,7 @@ Apache">
 			
 			<section class="second-part">
 				<div class="widget tagcloud">
-					<a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/maven/" style="font-size: 10.00px;">maven</a>
+					<a href="/tags/Git/" style="font-size: 15.00px;">Git</a><a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/Linux/" style="font-size: 15.00px;">Linux</a><a href="/tags/Sublime-Text/" style="font-size: 15.00px;">Sublime-Text</a><a href="/tags/Tips/" style="font-size: 10.00px;">Tips</a><a href="/tags/Tips-Sublime-Text/" style="font-size: 10.00px;">Tips Sublime-Text</a><a href="/tags/maven/" style="font-size: 15.00px;">maven</a><a href="/tags/tips/" style="font-size: 10.00px;">tips</a>
 				</div>
 			</section>
 			
@@ -137,6 +142,8 @@ Apache">
 		        
 					<li><a href="/archives">所有文章</a></li>
 		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
 		        <div class="clearfix"></div>
 				</ul>
 			</nav>
@@ -152,11 +159,11 @@ Apache">
 		</header>				
 	</div>
 </nav>
-      <article id="post-2014-05-13-maven-start" class="article article-type-post" itemscope itemprop="blogPost">
+      <article id="post-2014-05-19-sleep-wait-diff" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2014/10/03/2014-05-13-maven-start/" class="article-date">
-  	<time datetime="2014-10-03T06:00:05.000Z" itemprop="datePublished">Oct 3 2014</time>
+      <a href="/2014/10/05/2014-05-19-sleep-wait-diff/" class="article-date">
+  	<time datetime="2014-10-04T16:25:13.000Z" itemprop="datePublished">Oct 5 2014</time>
 </a>
       
   <div class="article-category">
@@ -164,7 +171,7 @@ Apache">
   </div>
 
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/maven/">maven</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/">Java</a></li></ul>
 
     </div>
   
@@ -174,7 +181,7 @@ Apache">
         
   
     <h1 class="article-title" itemprop="name">
-      maven入门
+      sleep(), wait()的区别
     </h1>
   
 
@@ -182,37 +189,20 @@ Apache">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="下载">下载</h2>
-<pre><code><span class="label">http:</span>//maven.apache<span class="preprocessor">.org</span>/download.html
-</code></pre><h2 id="配置">配置</h2>
-<pre><code>MAVEN_HOME : D:\apache-maven-<span class="number">3.0</span><span class="number">.2</span>  
-MAVEN : <span class="variable">%MAVEN_HOME</span><span class="variable">%\</span>bin   
-(可选） MAVEN_OPTS : -Xms256m -Xmx512m
-PATH: 添加 <span class="variable">%MAVEN</span>%
-</code></pre><h2 id="开始">开始</h2>
-<h3 id="验证安装成功">验证安装成功</h3>
-<pre><code>mvn -<span class="keyword">version</span>
-</code></pre><p>正常应该显示  </p>
-<pre><code>Apache Maven <span class="number">3.2</span><span class="number">.1</span> (ea8b2b07643dbb1b84b6d16e1f08391b666bc1e9;<span class="number">2014</span>-<span class="number">02</span>-<span class="number">15</span>T01:<span class="number">37</span>:<span class="number">52</span>+<span class="number">08</span>:<span class="number">00</span>)
-Maven home: <span class="keyword">D</span>:\apache-maven-<span class="number">3.2</span><span class="number">.1</span>\bin\..
-Java version: <span class="number">1.7</span><span class="number">.0</span>_09, vendor: Oracle Corporation
-Java home: <span class="keyword">C</span>:\Program Files\Java\jdk1<span class="number">.7</span><span class="number">.0</span>_09\jre
-<span class="keyword">Default</span> locale: zh_CN, platform encoding: GBK
-OS name: <span class="string">"windows 8"</span>, version: <span class="string">"6.2"</span>, arch: <span class="string">"amd64"</span>, family: <span class="string">"windows"</span>
-</code></pre><h3 id="创建项目">创建项目</h3>
-<pre><code><span class="comment">#此命令创建一个默认项目</span>
-mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <span class="variable">-DartifactId=</span>my-app
-<span class="comment">#此命令创建一个web项目</span>
-mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <span class="variable">-DartifactId=</span>webappp <span class="variable">-DarchetypeArtifactId=</span>maven-archetype-webapp
-</code></pre><p>创建一个默认项目，项目名为my-app，项目包结构为com.xiezefan.app  </p>
+        <h2 id="sleep(),_wait()的区别">sleep(), wait()的区别</h2>
+<h3 id="sleep(milliseconds)">sleep(milliseconds)</h3>
+<p>接收一个参数，使当前线程休眠一段时间。用户线程控制。<br>特点：  </p>
 <ul>
-<li>DgroupId 项目包结构</li>
-<li>DartifactId 项目名</li>
-<li>DarchetypeArtifactId 项目类型（maven-archetype-webapp是web项目，打包后生成war包）</li>
+<li>不释放同步锁。</li>
 </ul>
-<h3 id="常用命令">常用命令</h3>
-<pre><code>mvn <span class="keyword">package</span>  <span class="preprocessor">#打包项目，感觉pox.xml的packaging确定打包成jar or war</span>
-</code></pre>
+<h3 id="wait()">wait()</h3>
+<p>调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。<br>特定：  </p>
+<ul>
+<li>释放同步锁</li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,一个是线程之间的通讯的问题</p>
+
       
     </div>
     <footer class="article-footer">
@@ -224,18 +214,18 @@ mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <s
     
 <nav id="article-nav">
   
-    <a href="/2014/10/04/2014-05-19-final-finally-finalize-diff/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2014/10/05/2014-05-13-maven-start/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          final, finally, finalize的区别
+          maven入门
         
       </div>
     </a>
   
   
-    <a href="/2014/10/03/2014-05-19-sleep-wait-diff/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">sleep(), wait()的区别</div>
+    <a href="/2014/10/05/2014-05-19-java-constructor-base/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">基类构造函数，子类构造函数，成员类构造函数的调用顺序</div>
       <strong class="article-nav-caption">></strong>
     </a>
   
@@ -264,7 +254,7 @@ mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <s
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="2014-05-13-maven-start" data-title="maven入门" data-url="http://yoursite.com/2014/10/03/2014-05-13-maven-start/"></div>
+	<div class="ds-thread" data-thread-key="2014-05-19-sleep-wait-diff" data-title="sleep(), wait()的区别" data-url="http://yoursite.com/2014/10/05/2014-05-19-sleep-wait-diff/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

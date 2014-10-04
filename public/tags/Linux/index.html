@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Tag: maven | XieZefan&#39;s Blog</title>
+  <title>Tag: Linux | XieZefan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description">
 <meta property="og:type" content="website">
 <meta property="og:title" content="XieZefan's Blog">
-<meta property="og:url" content="http://yoursite.com/tags/maven/">
+<meta property="og:url" content="http://yoursite.com/tags/Linux/">
 <meta property="og:site_name" content="XieZefan's Blog">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
@@ -125,19 +125,19 @@
 </nav>
       
   
-    <article id="post-2014-05-13-maven-start" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-2014-10-05-tip-linux-common-command" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2014/10/05/2014-05-13-maven-start/" class="article-date">
-  	<time datetime="2014-10-04T16:25:13.000Z" itemprop="datePublished">Oct 5 2014</time>
+      <a href="/2014/10/05/2014-10-05-tip-linux-common-command/" class="article-date">
+  	<time datetime="2014-10-04T16:52:28.000Z" itemprop="datePublished">Oct 5 2014</time>
 </a>
       
   <div class="article-category">
-    <a class="article-category-link" href="/categories/Java/">Java</a>
+    <a class="article-category-link" href="/categories/tips/">tips</a>
   </div>
 
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/maven/">maven</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li></ul>
 
     </div>
   
@@ -147,7 +147,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2014/10/05/2014-05-13-maven-start/">maven入门</a>
+      <a class="article-title" href="/2014/10/05/2014-10-05-tip-linux-common-command/">Linux常用命令</a>
     </h1>
   
 
@@ -155,37 +155,27 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="下载">下载</h2>
-<pre><code><span class="label">http:</span>//maven.apache<span class="preprocessor">.org</span>/download.html
-</code></pre><h2 id="配置">配置</h2>
-<pre><code>MAVEN_HOME : D:\apache-maven-<span class="number">3.0</span><span class="number">.2</span>  
-MAVEN : <span class="variable">%MAVEN_HOME</span><span class="variable">%\</span>bin   
-(可选） MAVEN_OPTS : -Xms256m -Xmx512m
-PATH: 添加 <span class="variable">%MAVEN</span>%
-</code></pre><h2 id="开始">开始</h2>
-<h3 id="验证安装成功">验证安装成功</h3>
-<pre><code>mvn -<span class="keyword">version</span>
-</code></pre><p>正常应该显示  </p>
-<pre><code>Apache Maven <span class="number">3.2</span><span class="number">.1</span> (ea8b2b07643dbb1b84b6d16e1f08391b666bc1e9;<span class="number">2014</span>-<span class="number">02</span>-<span class="number">15</span>T01:<span class="number">37</span>:<span class="number">52</span>+<span class="number">08</span>:<span class="number">00</span>)
-Maven home: <span class="keyword">D</span>:\apache-maven-<span class="number">3.2</span><span class="number">.1</span>\bin\..
-Java version: <span class="number">1.7</span><span class="number">.0</span>_09, vendor: Oracle Corporation
-Java home: <span class="keyword">C</span>:\Program Files\Java\jdk1<span class="number">.7</span><span class="number">.0</span>_09\jre
-<span class="keyword">Default</span> locale: zh_CN, platform encoding: GBK
-OS name: <span class="string">"windows 8"</span>, version: <span class="string">"6.2"</span>, arch: <span class="string">"amd64"</span>, family: <span class="string">"windows"</span>
-</code></pre><h3 id="创建项目">创建项目</h3>
-<pre><code><span class="comment">#此命令创建一个默认项目</span>
-mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <span class="variable">-DartifactId=</span>my-app
-<span class="comment">#此命令创建一个web项目</span>
-mvn archetype:create <span class="variable">-DgroupId=</span>com.xiezefan.app <span class="variable">-DartifactId=</span>webappp <span class="variable">-DarchetypeArtifactId=</span>maven-archetype-webapp
-</code></pre><p>创建一个默认项目，项目名为my-app，项目包结构为com.xiezefan.app  </p>
-<ul>
-<li>DgroupId 项目包结构</li>
-<li>DartifactId 项目名</li>
-<li>DarchetypeArtifactId 项目类型（maven-archetype-webapp是web项目，打包后生成war包）</li>
-</ul>
-<h3 id="常用命令">常用命令</h3>
-<pre><code>mvn <span class="keyword">package</span>  <span class="preprocessor">#打包项目，感觉pox.xml的packaging确定打包成jar or war</span>
-</code></pre>
+        <p><strong>安装右键从终端启动</strong></p>
+<blockquote>
+<p>sudo apt-get install nautilus-open-terminal</p>
+</blockquote>
+<p><strong>复制文件到远程目录</strong></p>
+<blockquote>
+<p>scp filename  xiezf@192.168.248.124:/home/push</p>
+</blockquote>
+<p><strong>如果是复制文件夹，使用</strong></p>
+<blockquote>
+<p>scp -r filename  xiezf@192.168.248.124:/home/push</p>
+</blockquote>
+<p><strong>清理dns cache</strong></p>
+<blockquote>
+<p>sudo /etc/init.d/dns-clean start </p>
+</blockquote>
+<p><strong>查看域名解析</strong></p>
+<blockquote>
+<p>nslookup  api.jpush.cn</p>
+</blockquote>
+
       
     </div>
     <footer class="article-footer">

@@ -3,53 +3,26 @@
 <head>
   <meta charset="utf-8">
   
-  <title>sleep(), wait()的区别 | XieZefan&#39;s Blog</title>
+  <title>String，StringBuffer，StringBuilder的区别 | XieZefan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="sleep(), wait()的区别
-sleep(milliseconds)
-接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
-
-不释放同步锁。
-
-wait()
-调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
-
-释放同步锁
-
-总结
-其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
+  <meta name="description" content="String，StringBuffer，StringBuilder的区别
+String
+String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
+String">
 <meta property="og:type" content="article">
-<meta property="og:title" content="sleep(), wait()的区别">
-<meta property="og:url" content="http://yoursite.com/2014/10/03/2014-05-19-sleep-wait-diff/">
+<meta property="og:title" content="String，StringBuffer，StringBuilder的区别">
+<meta property="og:url" content="http://yoursite.com/2014/10/05/2014-05-19-String-StringBuffer-StringBuilder-diff/">
 <meta property="og:site_name" content="XieZefan's Blog">
-<meta property="og:description" content="sleep(), wait()的区别
-sleep(milliseconds)
-接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
-
-不释放同步锁。
-
-wait()
-调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
-
-释放同步锁
-
-总结
-其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
+<meta property="og:description" content="String，StringBuffer，StringBuilder的区别
+String
+String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
+String">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="sleep(), wait()的区别">
-<meta name="twitter:description" content="sleep(), wait()的区别
-sleep(milliseconds)
-接收一个参数，使当前线程休眠一段时间。用户线程控制。特点：  
-
-不释放同步锁。
-
-wait()
-调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。特定：  
-
-释放同步锁
-
-总结
-其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,">
+<meta name="twitter:title" content="String，StringBuffer，StringBuilder的区别">
+<meta name="twitter:description" content="String，StringBuffer，StringBuilder的区别
+String
+String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
+String">
 
   
     <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
@@ -96,6 +69,8 @@ wait()
 			        
 						<li><a href="/archives">所有文章</a></li>
 			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
 					</ul>
 				</nav>
 				<nav class="header-nav">
@@ -112,7 +87,7 @@ wait()
 			
 			<section class="second-part">
 				<div class="widget tagcloud">
-					<a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/maven/" style="font-size: 10.00px;">maven</a>
+					<a href="/tags/Git/" style="font-size: 15.00px;">Git</a><a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/Linux/" style="font-size: 15.00px;">Linux</a><a href="/tags/Sublime-Text/" style="font-size: 15.00px;">Sublime-Text</a><a href="/tags/Tips/" style="font-size: 10.00px;">Tips</a><a href="/tags/Tips-Sublime-Text/" style="font-size: 10.00px;">Tips Sublime-Text</a><a href="/tags/maven/" style="font-size: 15.00px;">maven</a><a href="/tags/tips/" style="font-size: 10.00px;">tips</a>
 				</div>
 			</section>
 			
@@ -140,6 +115,8 @@ wait()
 		        
 					<li><a href="/archives">所有文章</a></li>
 		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
 		        <div class="clearfix"></div>
 				</ul>
 			</nav>
@@ -155,11 +132,11 @@ wait()
 		</header>				
 	</div>
 </nav>
-      <article id="post-2014-05-19-sleep-wait-diff" class="article article-type-post" itemscope itemprop="blogPost">
+      <article id="post-2014-05-19-String-StringBuffer-StringBuilder-diff" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2014/10/03/2014-05-19-sleep-wait-diff/" class="article-date">
-  	<time datetime="2014-10-03T06:00:05.000Z" itemprop="datePublished">Oct 3 2014</time>
+      <a href="/2014/10/05/2014-05-19-String-StringBuffer-StringBuilder-diff/" class="article-date">
+  	<time datetime="2014-10-04T16:25:13.000Z" itemprop="datePublished">Oct 5 2014</time>
 </a>
       
   <div class="article-category">
@@ -177,7 +154,7 @@ wait()
         
   
     <h1 class="article-title" itemprop="name">
-      sleep(), wait()的区别
+      String，StringBuffer，StringBuilder的区别
     </h1>
   
 
@@ -185,19 +162,22 @@ wait()
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="sleep(),_wait()的区别">sleep(), wait()的区别</h2>
-<h3 id="sleep(milliseconds)">sleep(milliseconds)</h3>
-<p>接收一个参数，使当前线程休眠一段时间。用户线程控制。<br>特点：  </p>
-<ul>
-<li>不释放同步锁。</li>
-</ul>
-<h3 id="wait()">wait()</h3>
-<p>调用wait()方法将会将调用者的线程挂起，直到其他线程调用同一个对象的notify()方法后，才会重新激活调用者。<br>特定：  </p>
-<ul>
-<li>释放同步锁</li>
-</ul>
+        <h2 id="String，StringBuffer，StringBuilder的区别">String，StringBuffer，StringBuilder的区别</h2>
+<h3 id="String">String</h3>
+<p>String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。<br>另外 <code>String s = new String(&quot;abc&quot;)</code> 会生出两个对象, 因为括号里面的”abc”算一。</p>
+<h3 id="StringBuffer">StringBuffer</h3>
+<p>可变长度的字符串缓存区，特定是在append与insert操作的时候，速度会比String快很多。并且在多线程下是安全的。如果大量频繁的字符串操作，考虑使用该类。  </p>
+<h3 id="StringBuilder">StringBuilder</h3>
+<p>5.0后新增的方法，在多线程下不保证同步（即线程不安全），但速度会比StringBuffer快。所以，在单线程的环境下，建议使用StringBuilder。 </p>
 <h3 id="总结">总结</h3>
-<p>其实两者都可以让线程暂停一段时间,但是本质的区别是一个线程的运行状态控制,一个是线程之间的通讯的问题</p>
+<p>一般情况下，对字符串的操作速度 StringBuilder &gt; StringBuffer &gt; String。  </p>
+<ul>
+<li>字符串操作少的情况，使用 String</li>
+<li>单线程，字符串操作多的情况， 使用StringBuilder</li>
+<li>多线程，字符串操作多的情况， 使用StringBuffer</li>
+</ul>
+<h3 id="额外的注意">额外的注意</h3>
+<p><code>String s = a + b</code> 的情况 ，实际上JVM的处理是这样<code>String c = (new StringBuilder(String.valueOf(a))).append(b).toString()</code><br>如此一来每次字符串操作都会生出一个StringBuffer对象。效率多少会有点影响的。</p>
 
       
     </div>
@@ -210,18 +190,18 @@ wait()
     
 <nav id="article-nav">
   
-    <a href="/2014/10/03/2014-05-13-maven-start/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2014/10/05/2014-05-19-final-finally-finalize-diff/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          maven入门
+          final, finally, finalize的区别
         
       </div>
     </a>
   
   
-    <a href="/2014/10/03/2014-05-19-finally-lose/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">finally引起的异常丢失问题</div>
+    <a href="/2014/10/05/2014-05-19-HashMap-HashTable-diff/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">HashMap,HashTable区别</div>
       <strong class="article-nav-caption">></strong>
     </a>
   
@@ -250,7 +230,7 @@ wait()
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="2014-05-19-sleep-wait-diff" data-title="sleep(), wait()的区别" data-url="http://yoursite.com/2014/10/03/2014-05-19-sleep-wait-diff/"></div>
+	<div class="ds-thread" data-thread-key="2014-05-19-String-StringBuffer-StringBuilder-diff" data-title="String，StringBuffer，StringBuilder的区别" data-url="http://yoursite.com/2014/10/05/2014-05-19-String-StringBuffer-StringBuilder-diff/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

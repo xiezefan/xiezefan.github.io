@@ -3,26 +3,50 @@
 <head>
   <meta charset="utf-8">
   
-  <title>String，StringBuffer，StringBuilder的区别 | XieZefan&#39;s Blog</title>
+  <title>HashMap,HashTable区别 | XieZefan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="String，StringBuffer，StringBuilder的区别
-String
-String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
-String">
+  <meta name="description" content="HashMap,HashTable区别
+HashTable
+特点：线程同步 
+HashMap
+特定：
+
+线程不同步，但可以通过 Collections.synchronizedMap(HashMap map) 实现线程同步。
+允许Key，value值为空。
+优于HashTable的Hash算法，使Hash值更广泛的分布到数组的不同位置。
+更优的效率
+
+实际应用中，我们并不经常需要保证HashMap">
 <meta property="og:type" content="article">
-<meta property="og:title" content="String，StringBuffer，StringBuilder的区别">
-<meta property="og:url" content="http://yoursite.com/2014/10/04/2014-05-19-String-StringBuffer-StringBuilder-diff/">
+<meta property="og:title" content="HashMap,HashTable区别">
+<meta property="og:url" content="http://yoursite.com/2014/10/05/2014-05-19-HashMap-HashTable-diff/">
 <meta property="og:site_name" content="XieZefan's Blog">
-<meta property="og:description" content="String，StringBuffer，StringBuilder的区别
-String
-String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
-String">
+<meta property="og:description" content="HashMap,HashTable区别
+HashTable
+特点：线程同步 
+HashMap
+特定：
+
+线程不同步，但可以通过 Collections.synchronizedMap(HashMap map) 实现线程同步。
+允许Key，value值为空。
+优于HashTable的Hash算法，使Hash值更广泛的分布到数组的不同位置。
+更优的效率
+
+实际应用中，我们并不经常需要保证HashMap">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="String，StringBuffer，StringBuilder的区别">
-<meta name="twitter:description" content="String，StringBuffer，StringBuilder的区别
-String
-String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。另外 String s = new String(&quot;abc&quot;) 会生出两个对象, 因为括号里面的”abc”算一。
-String">
+<meta name="twitter:title" content="HashMap,HashTable区别">
+<meta name="twitter:description" content="HashMap,HashTable区别
+HashTable
+特点：线程同步 
+HashMap
+特定：
+
+线程不同步，但可以通过 Collections.synchronizedMap(HashMap map) 实现线程同步。
+允许Key，value值为空。
+优于HashTable的Hash算法，使Hash值更广泛的分布到数组的不同位置。
+更优的效率
+
+实际应用中，我们并不经常需要保证HashMap">
 
   
     <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
@@ -69,6 +93,8 @@ String">
 			        
 						<li><a href="/archives">所有文章</a></li>
 			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
 					</ul>
 				</nav>
 				<nav class="header-nav">
@@ -85,7 +111,7 @@ String">
 			
 			<section class="second-part">
 				<div class="widget tagcloud">
-					<a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/maven/" style="font-size: 10.00px;">maven</a>
+					<a href="/tags/Git/" style="font-size: 15.00px;">Git</a><a href="/tags/Java/" style="font-size: 20.00px;">Java</a><a href="/tags/Linux/" style="font-size: 15.00px;">Linux</a><a href="/tags/Sublime-Text/" style="font-size: 15.00px;">Sublime-Text</a><a href="/tags/Tips/" style="font-size: 10.00px;">Tips</a><a href="/tags/Tips-Sublime-Text/" style="font-size: 10.00px;">Tips Sublime-Text</a><a href="/tags/maven/" style="font-size: 15.00px;">maven</a><a href="/tags/tips/" style="font-size: 10.00px;">tips</a>
 				</div>
 			</section>
 			
@@ -113,6 +139,8 @@ String">
 		        
 					<li><a href="/archives">所有文章</a></li>
 		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
 		        <div class="clearfix"></div>
 				</ul>
 			</nav>
@@ -128,11 +156,11 @@ String">
 		</header>				
 	</div>
 </nav>
-      <article id="post-2014-05-19-String-StringBuffer-StringBuilder-diff" class="article article-type-post" itemscope itemprop="blogPost">
+      <article id="post-2014-05-19-HashMap-HashTable-diff" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2014/10/04/2014-05-19-String-StringBuffer-StringBuilder-diff/" class="article-date">
-  	<time datetime="2014-10-04T03:41:53.000Z" itemprop="datePublished">Oct 4 2014</time>
+      <a href="/2014/10/05/2014-05-19-HashMap-HashTable-diff/" class="article-date">
+  	<time datetime="2014-10-04T16:25:13.000Z" itemprop="datePublished">Oct 5 2014</time>
 </a>
       
   <div class="article-category">
@@ -150,7 +178,7 @@ String">
         
   
     <h1 class="article-title" itemprop="name">
-      String，StringBuffer，StringBuilder的区别
+      HashMap,HashTable区别
     </h1>
   
 
@@ -158,22 +186,18 @@ String">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="String，StringBuffer，StringBuilder的区别">String，StringBuffer，StringBuilder的区别</h2>
-<h3 id="String">String</h3>
-<p>String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。<br>另外 <code>String s = new String(&quot;abc&quot;)</code> 会生出两个对象, 因为括号里面的”abc”算一。</p>
-<h3 id="StringBuffer">StringBuffer</h3>
-<p>可变长度的字符串缓存区，特定是在append与insert操作的时候，速度会比String快很多。并且在多线程下是安全的。如果大量频繁的字符串操作，考虑使用该类。  </p>
-<h3 id="StringBuilder">StringBuilder</h3>
-<p>5.0后新增的方法，在多线程下不保证同步（即线程不安全），但速度会比StringBuffer快。所以，在单线程的环境下，建议使用StringBuilder。 </p>
-<h3 id="总结">总结</h3>
-<p>一般情况下，对字符串的操作速度 StringBuilder &gt; StringBuffer &gt; String。  </p>
+        <h2 id="HashMap,HashTable区别">HashMap,HashTable区别</h2>
+<h3 id="HashTable">HashTable</h3>
+<p>特点：线程同步 </p>
+<h3 id="HashMap">HashMap</h3>
+<p>特定：</p>
 <ul>
-<li>字符串操作少的情况，使用 String</li>
-<li>单线程，字符串操作多的情况， 使用StringBuilder</li>
-<li>多线程，字符串操作多的情况， 使用StringBuffer</li>
+<li>线程不同步，但可以通过 <code>Collections.synchronizedMap(HashMap map)</code> 实现线程同步。</li>
+<li>允许Key，value值为空。</li>
+<li>优于HashTable的Hash算法，使Hash值更广泛的分布到数组的不同位置。</li>
+<li>更优的效率</li>
 </ul>
-<h3 id="额外的注意">额外的注意</h3>
-<p><code>String s = a + b</code> 的情况 ，实际上JVM的处理是这样<code>String c = (new StringBuilder(String.valueOf(a))).append(b).toString()</code><br>如此一来每次字符串操作都会生出一个StringBuffer对象。效率多少会有点影响的。</p>
+<p>实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap</p>
 
       
     </div>
@@ -186,20 +210,15 @@ String">
     
 <nav id="article-nav">
   
-    <a href="/2014/10/04/2014-05-19-java-constructor-base/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2014/10/05/2014-05-19-String-StringBuffer-StringBuilder-diff/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          基类构造函数，子类构造函数，成员类构造函数的调用顺序
+          String，StringBuffer，StringBuilder的区别
         
       </div>
     </a>
   
-  
-    <a href="/2014/10/04/2014-05-19-final-finally-finalize-diff/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">final, finally, finalize的区别</div>
-      <strong class="article-nav-caption">></strong>
-    </a>
   
 </nav>
 
@@ -226,7 +245,7 @@ String">
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="2014-05-19-String-StringBuffer-StringBuilder-diff" data-title="String，StringBuffer，StringBuilder的区别" data-url="http://yoursite.com/2014/10/04/2014-05-19-String-StringBuffer-StringBuilder-diff/"></div>
+	<div class="ds-thread" data-thread-key="2014-05-19-HashMap-HashTable-diff" data-title="HashMap,HashTable区别" data-url="http://yoursite.com/2014/10/05/2014-05-19-HashMap-HashTable-diff/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

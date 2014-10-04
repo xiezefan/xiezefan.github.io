@@ -1,0 +1,34 @@
+# Header
+menu:
+  主页: /
+  所有文章: /archives
+  # 随笔: /tags/随笔
+
+# SubNav
+subnav:
+  github: "https://github.com/xiezefan"
+  weibo: "http://weibo.com/xiezefan"
+  #rss: "#"
+  #facebook: "#"
+  # google: "#"
+  # twitter: "#"
+  # linkedin: "#"
+
+rss: /atom.xml
+
+# Content
+excerpt_link: more
+fancybox: true
+
+# Miscellaneous
+
+favicon: /favicon.png
+
+#你的头像
+avatar: "http://xiezefan.qiniudn.com/avatar.jpg"
+#是否开启分享
+share: true
+#是否开启多说评论，填写你在多说申请的项目名称
+duoshuo: true
+#是否开启云标签
+tagcloud: true

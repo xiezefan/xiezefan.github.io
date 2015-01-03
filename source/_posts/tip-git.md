@@ -8,12 +8,17 @@ tags:
 - git
 ---
 
+
+<!-- more -->
+
 **生成SSH Key**
 > ssh-keygen -t rsa -C "committer_email@committermail.com"  
 
 **查看自己拥有的权限**
 > ssh -lgit <git host>
 > exp: ssh -lgit git.jpushoa.com
+
+<!-- more -->
 
 **添加并提交到本地库**
 > git commit -m 'your comment'

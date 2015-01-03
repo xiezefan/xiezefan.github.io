@@ -12,6 +12,8 @@ tags:
 [Agenda][1]是类似Quarzt的轻量级持久化任务调度框架, 数据存储再mongodb上, 部署与学习十分简单.
 第三方开发者还为Agenda提供了一个简易的UI界面 [Agenda UI][2]. 提供简单的可视化界面.
 
+<!-- more -->
+
 ### Base
 Agenda 将任务对象保存再mongo里面, 任务对象包含任务的name, 附带数据, 定时规则等.
 我们可以动态对任务进行CRUD操作. Agenda提供对应API.

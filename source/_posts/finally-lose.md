@@ -6,10 +6,13 @@ categories:
 - java
 tags:
 - java
+description: finally引起的异常丢失问题
 
 ---
 
-## finally引起的异常丢失问题
+finally 使用不当可能出现异常丢失问题，并且该缺陷尚未被修复， 开发中需要多加注意
+
+<!-- more -->
 
 ### 场景一
 

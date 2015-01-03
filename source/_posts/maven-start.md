@@ -9,6 +9,10 @@ tags:
 
 ---
 
+Maven简单入门， 快速入手
+
+<!-- more -->
+
 ## 下载
     http://maven.apache.org/download.html
 

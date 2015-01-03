@@ -8,12 +8,15 @@ tags:
 - sublime-text
 ---
 
+
 ### 通过添加PPA安装
 ```
 sudo add-apt-repository ppa:webupd8team/sublime-text-2
 sudo apt-get update
 sudo apt-get install sublime-text-2
 ```
+
+<!-- more -->
 
 ### 安装Soda主题
 安装 Package Control, 按 `Ctrl+~`进入控制台，粘贴以下代码

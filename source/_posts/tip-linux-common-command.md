@@ -8,12 +8,14 @@ tags:
 - linux 
 ---
 
+
 **安装右键从终端启动**
 > sudo apt-get install nautilus-open-terminal
 
 **复制文件到远程目录**
 > scp filename  xiezf@192.168.248.124:/home/push
 
+<!-- more -->
 
 **如果是复制文件夹，使用**
 > scp -r filename  xiezf@192.168.248.124:/home/push

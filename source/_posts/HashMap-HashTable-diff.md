@@ -6,8 +6,13 @@ categories:
 - java
 tags:
 - java
+description: 实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap
 
 ---
+
+实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap.
+
+<!-- more -->
 
 ## HashMap,HashTable区别
 
@@ -22,4 +27,4 @@ tags:
 * 优于HashTable的Hash算法，使Hash值更广泛的分布到数组的不同位置。
 * 更优的效率
 
-实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap
+实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap.

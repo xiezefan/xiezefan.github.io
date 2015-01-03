@@ -6,14 +6,15 @@ categories:
 - java
 tags:
 - java
+desciption: String，StringBuffer，StringBuilder的区别
 
 ---
-
-## String，StringBuffer，StringBuilder的区别
 
 ### String
 String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。  
 另外 `String s = new String("abc") ` 会生出两个对象, 因为括号里面的"abc"算一。
+
+<!-- more -->
 
 ### StringBuffer
 可变长度的字符串缓存区，特定是在append与insert操作的时候，速度会比String快很多。并且在多线程下是安全的。如果大量频繁的字符串操作，考虑使用该类。  

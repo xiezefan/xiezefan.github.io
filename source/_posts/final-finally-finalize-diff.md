@@ -6,14 +6,18 @@ categories:
 - java
 tags:
 - java
+description:  final, finally, finalize的区别
 
 ---
+
 
 ## final, finally, finalize的区别
 ### final
 * 如果一个类被声明为final，此类被能被重载。因此final和abstract不能同时修饰一个类
 * 如果一个方法被声明为final，此方法只能被使用，不能被重载
 * 如果一个变量被声明为final，此变量只能被使用，不能被修改，并且在声明的时候一定要初始化
+
+<!-- more -->
 
 ### finally
 异常处理的程序块，使用finally来进行必要的清理工作（如关闭数据库联系，文件流之类的）。  

@@ -1,3 +1,4 @@
 public/
 .deploy/
 *.log
+node_modules

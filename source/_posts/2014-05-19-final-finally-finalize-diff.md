@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "final, finally, finalize的区别"
+date: 2014-05-19
 categories:
-- Java
+- java
 tags:
-- Java
+- java
 
 ---
 

@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "Ubuntu快速安装Sublime-Text"
+date: 2014-10-05
 categories:
 - tips
 tags:
-- Sublime-Text
+- sublime-text
 ---
 
 ### 通过添加PPA安装

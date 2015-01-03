@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "基类构造函数，子类构造函数，成员类构造函数的调用顺序"
+date: 2014-05-19
 categories:
-- Java
+- java
 tags:
-- Java
+- java
 
 ---
 

@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "maven入门"
+date: 2014-05-13
 categories:
-- Java
+- java
 tags:
 - maven
 

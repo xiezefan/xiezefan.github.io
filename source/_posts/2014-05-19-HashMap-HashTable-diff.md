@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "HashMap,HashTable区别"
+date: 2014-05-19
 categories:
-- Java
+- java
 tags:
-- Java
+- java
 
 ---
 

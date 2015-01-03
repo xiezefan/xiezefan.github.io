@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "Linux常用命令"
+date: 2014-10-05
 categories:
 - tips
 tags:
-- Linux 
+- linux 
 ---
 
 **安装右键从终端启动**

@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "finally引起的异常丢失问题"
+date: 2014-05-19
 categories:
-- Java
+- java
 tags:
-- Java
+- java
 
 ---
 

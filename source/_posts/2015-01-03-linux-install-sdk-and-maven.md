@@ -1,10 +1,13 @@
 ---
 layout: post
 title: "Linux系统安装配置JDK与Maven"
+date: 2015-01-03
 categories:
-- Linux
+- linux
 tags:
-- linux,maven,jdk
+- linux
+- maven
+- jdk
 
 ---
 

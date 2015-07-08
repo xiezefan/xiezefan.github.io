@@ -2,3 +2,4 @@ public/
 .deploy/
 *.log
 node_modules
+.deploy_git

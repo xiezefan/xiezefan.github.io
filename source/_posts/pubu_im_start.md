@@ -11,6 +11,7 @@ tags:
 
 
 去年的这个时候，国外的企业协作工具[Slack](https://slack.com/)的报告铺天盖地，如今一年过去，Slack已经估值30亿美金，成了新的明星独角兽公司。  
+    
 不过Slack毕竟作为一款境外的软件，网络访问以及语言障碍在团队内推广还是挺成问题的。而近一年来，国内也涌现出一批类Slack的国产应用。如[瀑布IM](https://beta.pubu.im/)，[纷云](https://lesschat.com/)，[Bearychat](https://bearychat.com)等。
 
 

@@ -166,14 +166,13 @@ git submodule update --remote
 
 
 
-
-
-
-
 ### 参考资料
 
 * [Using Git Submodules for Maven Artifacts Not in Central](http://alex.nederlof.com/blog/2013/07/08/using-git-submodules-for-maven-artifacts-not-in-central/)
 * [Git 工具 - 子模块](https://git-scm.com/book/zh/v2/Git-工具-子模块)
+
+
+> 本文首发 : http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/
 
 
 

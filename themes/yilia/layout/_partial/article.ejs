@@ -40,12 +40,8 @@
 <%- partial('post/share') %>
 <% } %>
 
-<% if (!index && theme.duoshuo && post.comments){ %>
-<%- partial('post/duoshuo', {
-    key: post.slug,
-    title: post.title,
-    url: config.url+url_for(post.path)
-  }) %>
+<% if (!index && post.comments){ %>
+<%- partial('post/livere', {}) %>
 <% } %>
 
 <% if (!index && post.comments && config.disqus_shortname){ %>

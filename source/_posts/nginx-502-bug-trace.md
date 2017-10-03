@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "记一次生产环境Nginx间接性502的事故分析过程"
+title: "记一次生产环境Nginx间歇性502的事故分析过程"
 date: 2017-09-27
 categories:
 - issue-trace

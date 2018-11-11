@@ -3,3 +3,4 @@ public/
 *.log
 node_modules
 .deploy_git
+db.json

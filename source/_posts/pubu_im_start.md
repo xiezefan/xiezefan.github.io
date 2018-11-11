@@ -20,15 +20,15 @@ tags:
 
 先简单介绍下我们团队的现状，目前我们使用Gitlab + Tower.im + 瀑布IM，团队成员提交Pull Request后，需要其他成员Review才能合并进Master分支。而项目正处于前期开发阶段，对BUG的收集整理并不需要像生产环境的项目一样走一个复杂的流程，所以我们使用Tower.im来进行项目任务管理与BUG追踪。 
 
-![Tower.im](http://7jpp6b.com1.z0.glb.clouddn.com/blog/tower_screen.png)  
+![Tower.im](http://res.xiezefan.me/images/blog/tower_screen.png)  
 
 无意中在Tower.im的主页上看到瀑布IM的介绍，试用了下效果非常不错，推广到整个开发小组，组内成员普遍好评，简单地设置了WebHooks就接入了Gitlab与Tower.im， 小组成员提交了代码，创建Pull Request，在Tower上创建/讨论/完成任务，第一时间在瀑布IM上就可以收到消息，这在团队密切协作的时候特别有用，你能快速地了解到，你的队友在做什么。所有地碎片化消息都统一地在一个平台内展示。
 
-![Pubu.im Screen](http://7jpp6b.com1.z0.glb.clouddn.com/blog/pubu_im_screen.png?t=1)
+![Pubu.im Screen](http://res.xiezefan.me/images/blog/pubu_im_screen.png?t=1)
 
 在以往，我们用QQ群，QQ讨论组做团队沟通，有时候很无奈，QQ上掺杂着很多私人的关系在上面，工作时候的确会有一些干扰，瀑布IM的组内讨论，体验上虽然有些许比不上QQ，但作为工作讨论可以屏蔽掉很多干扰。并且我很喜欢其中的一个功能，瀑布IM会收集团队聊天中的图片，文件，代码片段，特别是链接片段，这无疑是一个需求痛点，工作中，我经常翻好几页聊天记录去找同事N天前发给我的测试页面的链接。
 
-![Pubu.im Files Collection](http://7jpp6b.com1.z0.glb.clouddn.com/blog/pubu_im_files_collection.jpg)
+![Pubu.im Files Collection](http://res.xiezefan.me/images/blog/pubu_im_files_collection.jpg)
 
 
 ### 自定义扩展
@@ -65,7 +65,7 @@ request({
 });
 ```
 
-![Pubu.im Custom Service](http://7jpp6b.com1.z0.glb.clouddn.com/blog/pubu_im_custom_service.png)  
+![Pubu.im Custom Service](http://res.xiezefan.me/images/blog/pubu_im_custom_service.png)  
 
 
 有一点需要吐槽的是，瀑布IM提供的API有一个BUG，当未指定`Content-Type=application/json`的时候，API会抛500异常，回复邮件反馈也不是很迅速，最后还是我自己找到原因的。不过考虑到目前该产品仍然处于Beta版本，还是可以理解的。另外，在JSON中使用驼峰式命名是很不专业的行为呀。

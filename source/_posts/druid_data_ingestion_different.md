@@ -36,7 +36,7 @@ Realtime Node 可以直接配置Firehose从Kafka，RabbitMQ等消息队列中获
 这时候你需要进行Replication以保证高可用，所以你启动了另外2个实时节点并以新的Kafka Topic去消费数据。 这时候看节点3可能消费了partitons 1，节点4可能消费了partitions 2与3。
 前文提到Segment partitionNum查询的特性，这时候Druid会认为节点3与4是同一个分区，所以数据查询只会从中挑选一个节点进行查询，但很明显他们数据是不一样的。
 
-![Druid Realtime Node缺陷](http://res.xiezefan.me/images/Druid Realtime Node defects.png)
+![Druid Realtime Node缺陷](http://pics.xiezefan.me/Druid Realtime Node defects.png)
 
 
 #### 数据丢失风险
@@ -52,7 +52,7 @@ Realtime Node 可以直接配置Firehose从Kafka，RabbitMQ等消息队列中获
 
 以下是Druid官方的Indexing Service架构图
 
-![Druid Indexing Service Architecture](http://res.xiezefan.me/images/indexing_service.png)
+![Druid Indexing Service Architecture](http://pics.xiezefan.me/indexing_service.png)
 
 Indexing Service分为以下几个部分:
 

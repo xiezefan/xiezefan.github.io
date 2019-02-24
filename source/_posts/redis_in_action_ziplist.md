@@ -18,7 +18,7 @@ tags:
 
 Redis的ziplist是用一段连续的内存来存储列表数据的一个数据结构，它的结构示例如下图
 
-![压缩列表组成示例--截图来自《Redis设计与实现》](http://res.xiezefan.me/images/14934574638948.jpg)
+![压缩列表组成示例--截图来自《Redis设计与实现》](http://pics.xiezefan.me/14934574638948.jpg)
 
 1. zlbytes: 记录整个压缩列表使用的内存大小
 2. zltail: 记录压缩列表表尾距离起始位置有多少字节
@@ -26,7 +26,7 @@ Redis的ziplist是用一段连续的内存来存储列表数据的一个数据�
 4. zleng: 压缩列表末端标志位，固定值为`OxFF`
 5. entry1-N: 压缩列表节点, 具体结构如下图
 
-![压缩列表节点组成示例--截图来自《Redis设计与实现》](http://res.xiezefan.me/images/14934575513141.jpg)
+![压缩列表节点组成示例--截图来自《Redis设计与实现》](http://pics.xiezefan.me/14934575513141.jpg)
 
 其中
 

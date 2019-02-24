@@ -31,7 +31,7 @@ tags:
 <!-- more -->
 
 我们简单做了个对比测试，分别对域名（请求走Nginx）与直接通过IP对内网一个API通过wrk进行小规模压测。
-![压测截图](http://res.xiezefan.me/images/压测截图.png)
+![压测截图](http://pics.xiezefan.me/压测截图.png)
 对比测试发现，直接通过域名走Nginx对API进行压测的话，QPS远远小于预期，并且存在大量失败请求。基本断定问题出在Nginx —> API 这条链路上。同时排除了后端服务响应不过来的可能性。网络问题可能性大一点。
 
 一开始我们怀疑云服务商对内网带宽做了限制，我们观察内网带宽达到在200MB/S后就上不去了，所以我们在Nginx机器上ping后端服务，观察一段时间发现有小量抖动，但基本延迟正常。那云服务商对网络做限制的可能性就变小了很多。
@@ -42,7 +42,7 @@ tags:
 2017/09/26 14:23:00 [error] 4950#4950: *4162133210 no live upstreams while connecting to upstream, client: xxx.xxx.xxx.xxx, server: api.xx.xxxxxxx.cn, request: "POST /xx/xxxxxx/bidder HTTP/1.1", upstream: "http://xxxxxxxxxx/bidder", host: "api.xx.xxxxxxx.cn"
 ```
 这里出现`no live upstreams while connecting to upstream`, 也就说一瞬间Nginx检测不到任何存活的后端服务，而网络又没有大波动，那就可能是TCP链接出问题。打开Zabbix监控发现TCP连接数的确发生剧烈的波动现象。
-![异常TCP连接数趋势](http://res.xiezefan.me/images/异常TCP连接数趋势.png)
+![异常TCP连接数趋势](http://pics.xiezefan.me/异常TCP连接数趋势.png)
 
 这时候问题很明显，Nginx->API这一链路存在大量的TCP链接被回收的情况，我们马上在API机器上查看链接状态
 
@@ -65,7 +65,7 @@ upstream xxxxxxx {
 ```
 
 因为业务的特殊性，我们很确定Client一定为携带Keep-Alive的。那么说明后端API没正确的支持Keep-Alive，我们开始对API代码逻辑进行Review，但我们检查配置，发现服务默认是开启Keep-Alive的，我们进行显式的配置，仍然不起作用。这里存在一个可能性就是我们时候的Web框架有BUG。所以我们接下来做了一个测试，来验证服务是否开启了Keep-Alive。
-![Keep-Alive测试](http://res.xiezefan.me/images/Keep-Alive测试.png)
+![Keep-Alive测试](http://pics.xiezefan.me/Keep-Alive测试.png)
 我们使用curl连发两次请求，在第二次请求的报文中，我们可以看到`Re-using existing connection`。这说明连接被复用，后端API服务对Keep-Alive的支持是正常的。
 
 这时候就陷入了困境了，求助Google大神后，发现Nginx支持Keep-Alive还需要在配置转发的时候的时候增加以下配置:

@@ -1,4 +1,5 @@
-public/
+db.json
+public
 .deploy/
 *.log
 node_modules

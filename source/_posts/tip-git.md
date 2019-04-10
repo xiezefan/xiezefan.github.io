@@ -16,7 +16,7 @@ tags:
 
 **查看自己拥有的权限**
 > ssh -lgit <git host>
-> exp: ssh -lgit git.jpushoa.com
+> exp: ssh -lgit git.github.com
 
 <!-- more -->
 

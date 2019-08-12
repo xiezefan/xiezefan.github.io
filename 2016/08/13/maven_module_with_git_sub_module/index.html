@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>使用Git SubModule对Maven Module进行优化 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/">
+  <meta name="description" content="这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。">
+<meta name="keywords" content="maven,git">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Git SubModule对Maven Module进行优化">
+<meta property="og:url" content="http://yoursite.com/2016/08/13/maven_module_with_git_sub_module/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.389Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用Git SubModule对Maven Module进行优化">
+<meta name="twitter:description" content="这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-maven_module_with_git_sub_module" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/08/13/maven_module_with_git_sub_module/" class="article-date">
+  	<time datetime="2016-08-12T16:00:00.000Z" itemprop="datePublished">Aug 13 2016</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/maven/">maven</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/">git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/maven/">maven</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用Git SubModule对Maven Module进行优化
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。</p>
+<p>之所以有这篇文章，是因为在使用Maven管理Java项目的过程中，当项目逐渐发展到一点规模后，我们将项目进行模块划分，将不同业务功能拆分为不同的Maven Module，模块之间有依赖关系，但可以分开部署。</p>
+<p>但紧随而来的问题是：</p>
+<ol>
+<li>当项目模块越来越多的时候，项目的编译时间越来越长</li>
+<li>我们使用Gitlab CI做持续集成与持续交付。 Gitlab CI的持续集成与交付的是由每次Commit与每次Release Tag触发的。也就是说，每次触发CI的时候，各个模块都需要跑一边集成测试，而更麻烦的在于，无法使用Gitlab CI直接对项目进行自动部署，因为你不能每次发布的时候，都将所有的子模块都部署一遍。</li>
+</ol>
+<a id="more"></a>
+<p>为了应对这个问题，显然我们需要将项目进行拆分，按部署单元将拆分为不同的Git Repository。常规的做法是将项目中公共的模块抽取成独立的Maven Dependency。 打包发布到私有的Maven仓库。但这显然太繁琐了，因为项目迭代开发过程中，即使是公共的模块，也会频繁的变更，每次变更其余依赖模块都需要升级版本。</p>
+<p>自此终于引出文本的主题，如何使用Git SubModule与Maven Module来优雅的解决上述问题。</p>
+<h3 id="Maven-Module-拆分示例"><a href="#Maven-Module-拆分示例" class="headerlink" title="Maven Module 拆分示例"></a>Maven Module 拆分示例</h3><p>我们以一个Blog后台的API项目作为示例</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.</span><br><span class="line">├── dashboard-api       // Blog管理后台API模块</span><br><span class="line">│   └── pom.xml</span><br><span class="line">├── blog-api            // Blog前端的API模块</span><br><span class="line">│   └── pom.xml</span><br><span class="line">├── blog-common         // Blog系统的公共代码，如Entity，Util，Helper等逻辑</span><br><span class="line">│   └── pom.xml</span><br><span class="line">└── pom.xml</span><br></pre></td></tr></table></figure>
+<p>dashboard-api与blog-api都依赖blog-common，但两个模块最终都会打成独立的包分开部署。</p>
+<p><strong>PS: 显然一个Blog系统不需要做这么细致的模块划分，这里只是举例子方便大家理解。</strong></p>
+<p>我们的目标是将该项目拆分为3个Git Repositories:</p>
+<ol>
+<li>blog-common</li>
+<li>blog-api</li>
+<li>blog-dashboard-api</li>
+</ol>
+<p>首先我们将blog-common项目拆分出来</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd blog-common</span><br><span class="line">git init</span><br><span class="line">git remote add origin git@your-repository.com:xiezefan/blog-common.git</span><br><span class="line">git add .</span><br><span class="line">git commit</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+<p>接下来我们将为blog-api独立成一个新的项目，并将blog-common设置为blog-api的子模块</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir blog-api</span><br><span class="line">cp -rf my-blog/blog-api blog-api/api</span><br><span class="line">cp my-blog/pom.xml blog-api/</span><br><span class="line"></span><br><span class="line">cd blog-api</span><br><span class="line">git submodule add -b master git@your-repository.com:xiezefan/blog-common.git</span><br></pre></td></tr></table></figure>
+<p>这时候blog-api项目下将会生成<code>.gitmodule</code>文件，该文件对本项目的Git子模块进行声明</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// .gitmodule</span><br><span class="line">submodule [&quot;blog-common&quot;]</span><br><span class="line">        path = blog-common</span><br><span class="line">        url = git@your-repository.com:xiezefan/blog-common.git</span><br><span class="line">        branch = master</span><br></pre></td></tr></table></figure>
+<p>接着我们编辑根目录下的pom.xml文件，声明<code>blog-common</code>, <code>api</code> 两个子模块</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">// pom.xml</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">modules</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">module</span>&gt;</span>blog-common<span class="tag">&lt;/<span class="name">module</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">module</span>&gt;</span>api<span class="tag">&lt;/<span class="name">module</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">modules</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>最后在<code>api</code>模块中，将<code>blog-common</code>进行引入即可。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">// api/pom.xml</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>me.xiezefan.blog<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>blog-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>在此大功告成，此时项目的目录结构应为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.</span><br><span class="line">├── blog-api</span><br><span class="line">    ├── .gitmodule</span><br><span class="line">    ├── .gitignore</span><br><span class="line">    ├── api</span><br><span class="line">    │   └── pom.xml</span><br><span class="line">    ├── blog-common</span><br><span class="line">    │   └── pom.xml</span><br><span class="line">    └── pom.xml</span><br></pre></td></tr></table></figure>
+<p>我们可以执行<code>mvn clean package</code>进行打包看看拆分是否成功。 依据同样的方法，我们可以对blog-dashboard-api进行拆分。 </p>
+<h3 id="如何使用Git-SubModule"><a href="#如何使用Git-SubModule" class="headerlink" title="如何使用Git SubModule"></a>如何使用Git SubModule</h3><p>因为blog-commmon本身是一个独立的项目，我们每次对其进行修改后，只需要在这模块中执行常规的git提交命令即可对模块进行更新。</p>
+<p>而对子模块的更新也有些许不同，当开发者第一次checkout带子模块的项目的时候，需要额外执行子模块检出命令。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone </span><br><span class="line">git@your-repository.com:xiezefan/blog-api.git</span><br><span class="line"></span><br><span class="line">cd blog-api</span><br><span class="line">git submodule init</span><br><span class="line">git submodule update --remote</span><br></pre></td></tr></table></figure>
+<p>此后，每次需要对子模块进行更新的时候，只需要执行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --remote</span><br></pre></td></tr></table></figure>
+<h3 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h3><p>之所以研究Git Module来对Maven的项目结构进行优化，主要是因为在使用Gitlab CI进行持续集成过程中，面对一个项目中有多个模块的情况下，持续集成无法对子模块进行按需部署。</p>
+<p>为了解决这个问题，我一开始的思路是在CI脚本中编写逻辑判断，然后使用Gitlab Triggering API触发CI脚本并传入不同参数来选择部署不同的子模块。但这个解决方案还需要有一个定制的控制台来选择触发指定模块以及指定版本。</p>
+<p>对于创业公司永远不足的人力面前，最忌讳就是盲目造轮子。所以后来我选择的Git Module模块来解决这个问题，虽然会照成多出大量的Git Repositories的负作用，但这显然比造一个轮子来的经济实惠。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="http://alex.nederlof.com/blog/2013/07/08/using-git-submodules-for-maven-artifacts-not-in-central/" target="_blank" rel="noopener">Using Git Submodules for Maven Artifacts Not in Central</a></li>
+<li><a href="https://git-scm.com/book/zh/v2/Git-工具-子模块" target="_blank" rel="noopener">Git 工具 - 子模块</a></li>
+</ul>
+<blockquote>
+<p>本文首发 : <a href="http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/" target="_blank" rel="noopener">http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/</a></p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/09/elk_in_action_grok_start/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          ELK实战 - Grok简易入门
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/13/redis_cluster_research_2/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Redis Cluster 初探(2) - 运行规制</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

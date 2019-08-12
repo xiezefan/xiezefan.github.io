@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android 封装SDK时常用的注解 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2015/07/07/android-annotations-start/">
+  <meta name="description" content="工作中，我们经常需要将功能模块封装成库供合作厂商调用， 如何写好一个健壮的Android Library有很多讲究，使用注解可以对SDK暴露给开发者的接口做出一些限制，从而尽可能地避免开发者错误地使用API。 下面我们介绍几种封装SDK时常用到的注解。">
+<meta name="keywords" content="android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 封装SDK时常用的注解">
+<meta property="og:url" content="http://yoursite.com/2015/07/07/android-annotations-start/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="工作中，我们经常需要将功能模块封装成库供合作厂商调用， 如何写好一个健壮的Android Library有很多讲究，使用注解可以对SDK暴露给开发者的接口做出一些限制，从而尽可能地避免开发者错误地使用API。 下面我们介绍几种封装SDK时常用到的注解。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip.png">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_anination_class.png">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip2.png">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/drawable_res_error_tip.png">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/non_null_waring_tip.png">
+<meta property="og:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/nullable_waring_tip.png">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.387Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 封装SDK时常用的注解">
+<meta name="twitter:description" content="工作中，我们经常需要将功能模块封装成库供合作厂商调用， 如何写好一个健壮的Android Library有很多讲究，使用注解可以对SDK暴露给开发者的接口做出一些限制，从而尽可能地避免开发者错误地使用API。 下面我们介绍几种封装SDK时常用到的注解。">
+<meta name="twitter:image" content="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip.png">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-android-annotations-start" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/07/07/android-annotations-start/" class="article-date">
+  	<time datetime="2015-07-06T16:00:00.000Z" itemprop="datePublished">Jul 7 2015</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android 封装SDK时常用的注解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>工作中，我们经常需要将功能模块封装成库供合作厂商调用， 如何写好一个健壮的Android Library有很多讲究，使用注解可以对SDK暴露给开发者的接口做出一些限制，从而尽可能地避免开发者错误地使用API。 下面我们介绍几种封装SDK时常用到的注解。</p>
+<a id="more"></a>
+<h3 id="IntDef与StringDef"><a href="#IntDef与StringDef" class="headerlink" title="IntDef与StringDef"></a>IntDef与StringDef</h3><p>我们有时候会使用int常量或者String常量来代替枚举， 特别在你编写SDK的时候，你可以通过IntDef或者StringDef来限制接口可接受的参数。  </p>
+<p>比如，有一个 <code>disableChannel</code>的接口，用来关闭指定的<code>channel</code> 。 我们可以先定义自己的注解<code>@RequirePayChannel</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CHANNEL_UNIONPAY = <span class="number">0x11000</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CHANNEL_ALIPAY = <span class="number">0x12000</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CHANNEL_WECHAT = <span class="number">0x13000</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</span><br><span class="line"><span class="meta">@IntDef</span>(&#123;CHANNEL_UNIONPAY,CHANNEL_ALIPAY,CHANNEL_WECHAT&#125;)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RequirePayChannel &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，你便可以通过<code>@RequirePayChannel</code>来指定disableChannel()的可接受参数</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enableChannel</span><span class="params">(@RequirePayChannel <span class="keyword">int</span> channel)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，一些IDE还会自动提供给你建议参数。如果填入指点范围之外的参数，将会出现错误提示并无法编译通过。<br><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip.png" alt="错误提示2"><br>值得一说的是， 在这里，我们使用到了<code>@Retention(RetentionPolicy.SOURCE)</code>。 它指定了编译器在处理Animation时候的处理方法。 默认编译器会将常量替换成对应的数值，如果没指定该注解，你编译完成后将得到这样的class文件:</p>
+<p><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_anination_class.png" alt="反编译RequirePayChannel"></p>
+<p>这样会导致IDE不能提示到有意义的信息。并且一定要指定为特定的int数值，否则也无法编译通过。<br><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip2.png" alt="错误提示3"><br>所以，应该指定<code>Retention</code>让编译器不对该注解做额外的优化处理。</p>
+<h3 id="DrawableRes-StringRes-与-DimenRes"><a href="#DrawableRes-StringRes-与-DimenRes" class="headerlink" title="DrawableRes, StringRes 与 DimenRes"></a>DrawableRes, StringRes 与 DimenRes</h3><p>当我们在编写指定资源文件的接口时，可以通过资源注解来指定该方法接受的资源类型。 指定错误的资源将不能编译通过。 下面代码中，我们使用<code>@DrawableRes</code>来表明<code>setLogo</code>方法只支持Drawable资源的ID。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLogo</span><span class="params">(@DrawableRes <span class="keyword">int</span> resurceId)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们提供错误的资源，IDE将会报错。<br><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/drawable_res_error_tip.png" alt="错误提示4">  </p>
+<p><code>@StringRes</code> 与 <code>@DimenRes</code> 的使用方法也类似。</p>
+<h3 id="NonNull-与-Nullable"><a href="#NonNull-与-Nullable" class="headerlink" title="NonNull 与 Nullable"></a>NonNull 与 Nullable</h3><p>将一个空值传入一个方法中可能引发潜在的Crash。 我们应该极力避免这种情况， @NonNull 可以指定参数是否接受空值，当我们传入一个空值的时候，IDE会给出响应的警告。 我们可以这样使用它：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContext</span><span class="params">(@NonNull Context context)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们对其传入一个空值的时候，将会显示警告（但代码仍然能通过编译）<br><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/non_null_waring_tip.png" alt="错误提示5">  </p>
+<p><code>@Nullable</code> 用于修饰参数或者方法的返回值可能为空，提醒开发者主要空值检查。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Nullable</span><br><span class="line">public Context getContext() &#123;return null;&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="http://7jpp6b.com1.z0.glb.clouddn.com/blog/nullable_waring_tip.png" alt="错误提示6">  </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/10/24/pubu_im_start/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          生成力工具【瀑布IM】正确使用手册
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/03/mysql-utf8mb4/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MySQL解决插入emoji表情失败的问题</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

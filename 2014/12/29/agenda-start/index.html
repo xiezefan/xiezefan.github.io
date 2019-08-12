@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Agenda笔记 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2014/12/29/agenda-start/">
+  <meta name="description" content="Agenda是类似Quarzt的轻量级持久化任务调度框架, 数据存储再mongodb上, 部署与学习十分简单.第三方开发者还为Agenda提供了一个简易的UI界面 Agenda UI. 提供简单的可视化界面.">
+<meta name="keywords" content="agenda">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agenda笔记">
+<meta property="og:url" content="http://yoursite.com/2014/12/29/agenda-start/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="Agenda是类似Quarzt的轻量级持久化任务调度框架, 数据存储再mongodb上, 部署与学习十分简单.第三方开发者还为Agenda提供了一个简易的UI界面 Agenda UI. 提供简单的可视化界面.">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.385Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Agenda笔记">
+<meta name="twitter:description" content="Agenda是类似Quarzt的轻量级持久化任务调度框架, 数据存储再mongodb上, 部署与学习十分简单.第三方开发者还为Agenda提供了一个简易的UI界面 Agenda UI. 提供简单的可视化界面.">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-agenda-start" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2014/12/29/agenda-start/" class="article-date">
+  	<time datetime="2014-12-28T16:00:00.000Z" itemprop="datePublished">Dec 29 2014</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/nodejs/">nodejs</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/agenda/">agenda</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Agenda笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><a href="https://github.com/rschmukler/agenda" target="_blank" rel="noopener">Agenda</a>是类似Quarzt的轻量级持久化任务调度框架, 数据存储再mongodb上, 部署与学习十分简单.<br>第三方开发者还为Agenda提供了一个简易的UI界面 <a href="https://github.com/moudy/agenda-ui" target="_blank" rel="noopener">Agenda UI</a>. 提供简单的可视化界面.</p>
+<a id="more"></a>
+<h3 id="Base"><a href="#Base" class="headerlink" title="Base"></a>Base</h3><p>Agenda 将任务对象保存再mongo里面, 任务对象包含任务的name, 附带数据, 定时规则等.<br>我们可以动态对任务进行CRUD操作. Agenda提供对应API.</p>
+<p>虽然Agenda本身提供的对Job的操作比较简单, 但因为Agenda的Job都是存储再mongo之中,所以我们可以通过直接操作monogo实现的Job的更新与删除.</p>
+<h3 id="Start"><a href="#Start" class="headerlink" title="Start"></a>Start</h3><p>简单的添加任务操作:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var job = agenda.create(&apos;testJob&apos;, &#123;key: &quot;value&quot;&#125;);</span><br><span class="line">job.repeatEvery(&apos;5 seconds&apos;);</span><br><span class="line">job.save(function(err) &#123;</span><br><span class="line">    console.log(&quot;Job successfully saved&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>程序开始时,我们需要创建agenda对象,指定事件响应函数,并开始执行任务调用.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var agenda = new Agenda(&#123;db: &#123; address: &apos;localhost:27017/agenda-example&apos;&#125;);</span><br><span class="line">agenda.define(&apos;testJob&apos;,  function(job) &#123;</span><br><span class="line">    console.log(&quot;Job execute, now is &quot; + new Date()  + &quot; Data=&quot; + JSON.stringify(job.attrs.data));</span><br><span class="line">&#125;);</span><br><span class="line">agenda.run();</span><br></pre></td></tr></table></figure>
+<h4 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h4><p>Agenda使用mongodb。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 指定使用的mongodb，默认使用agendaJobs集合</span><br><span class="line">var agenda = new Agenda(&#123;db: &#123; address: &apos;localhost:27017/agenda-example&apos;&#125;&#125;);</span><br><span class="line"></span><br><span class="line">// 如果需要指定其他集合</span><br><span class="line">var agenda = new Agenda(&#123;db: &#123; address: &apos;localhost:27017/agenda-test&apos;, collection: &apos;agendaJobs&apos; &#125;&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="指定循环规制"><a href="#指定循环规制" class="headerlink" title="指定循环规制"></a>指定循环规制</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 直接构造的agenda对象的时候指定</span><br><span class="line">var agenda = new Agenda(&#123;processEvery: &apos;1 minute&apos;&#125;);</span><br><span class="line">// 1分钟循环一次</span><br><span class="line">agenda.processEvery(&apos;1 minute&apos;);</span><br></pre></td></tr></table></figure>
+<h4 id="指定任务最大并发数"><a href="#指定任务最大并发数" class="headerlink" title="指定任务最大并发数"></a>指定任务最大并发数</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 构造时指定</span><br><span class="line">var agenda = new Agenda(&#123;maxConcurrency: 20&#125;);</span><br><span class="line">// 直接指定</span><br><span class="line">agenda.maxConcurrency(20);</span><br></pre></td></tr></table></figure>
+<h4 id="指定默认并发数"><a href="#指定默认并发数" class="headerlink" title="指定默认并发数"></a>指定默认并发数</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 构造时指定</span><br><span class="line">agenda.defaultConcurrency(5);</span><br><span class="line">// 直接指定</span><br><span class="line">var agenda = new Agenda(&#123;defaultConcurrency: 5&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="设置任务最大响应时间"><a href="#设置任务最大响应时间" class="headerlink" title="设置任务最大响应时间"></a>设置任务最大响应时间</h4><p>指定任务从开始执行到调用finish的时间（指调用done函数），这能有效的解决任务奔溃或者超时</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 构造时指定</span><br><span class="line">var agenda = new Agenda(&#123;defaultLockLifetime: 10000&#125;);</span><br><span class="line">// 直接指定</span><br><span class="line">agenda.defaultLockLifetime(10000);</span><br></pre></td></tr></table></figure>
+<h3 id="定义任务处理器"><a href="#定义任务处理器" class="headerlink" title="定义任务处理器"></a>定义任务处理器</h3><h4 id="定义任务行为"><a href="#定义任务行为" class="headerlink" title="定义任务行为"></a>定义任务行为</h4><p>当执行的任务为异步方法的时候，需要再方法最后调用done()<br>如果为同步方法，则省略声明done</p>
+<p>影响任务行为的参数：</p>
+<ul>
+<li>concurrency 指定最大任务并发数</li>
+<li>lockLifetime 锁生存时间,指定异步调用时最长等待时间</li>
+<li>priority 优先级(lowest|low|normal|high|highest|number)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 执行任务为异步方法</span><br><span class="line">agenda.define(&apos;job_name&apos;, function(job, done) &#123;</span><br><span class="line">    doSomething(function() &#123;</span><br><span class="line">        done();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 执行任务为同步方法</span><br><span class="line">agenda.define(&apos;say hello&apos;, function(job) &#123;</span><br><span class="line">  console.log(&quot;Hello!&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h4><p>指定任务重复的规制,支持数字, cron表达式, 甚至如10 minutes等可读性较高的表达式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">job.repeatEvery(&apos;10 minutes&apos;);</span><br><span class="line">job.repeatEvery(&apos;*/10 * * * * * *&apos;);</span><br></pre></td></tr></table></figure>
+<p>指定特定的重复时间</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 每天15:30</span><br><span class="line">job.repeatAt(&apos;3:30pm&apos;);</span><br></pre></td></tr></table></figure>
+<p>指定只执行一次的的任务</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">job.schedule(&apos;3:30pm&apos;);</span><br></pre></td></tr></table></figure>
+<p>now<br>马上执行某事件<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">agenda.now(&apos;do the hokey pokey&apos;);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/01/03/linux-install-sdk-and-maven/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          Linux系统安装配置JDK与Maven
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/29/mqtt-start/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MQTT 基础知识</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

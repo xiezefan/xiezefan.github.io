@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Redis Cluster 初探(2) - 运行规制 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2015/12/13/redis_cluster_research_2/">
+  <meta name="description" content="上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis Cluster 初探(2) - 运行规制">
+<meta property="og:url" content="http://yoursite.com/2015/12/13/redis_cluster_research_2/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/redis_cluster_slot_model.png">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/redis_cluster_slot_model2.png">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.390Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis Cluster 初探(2) - 运行规制">
+<meta name="twitter:description" content="上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。">
+<meta name="twitter:image" content="http://pics.xiezefan.me/blog/redis_cluster_slot_model.png">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-redis_cluster_research_2" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/12/13/redis_cluster_research_2/" class="article-date">
+  	<time datetime="2015-12-12T16:00:00.000Z" itemprop="datePublished">Dec 13 2015</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Database/">Database</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis Cluster 初探(2) - 运行规制
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。</p>
+<a id="more"></a>
+<p>Redis Cluster是无中心节点的设计，Client可以连接集群中的任一一个节点，当操作的Key不在该节点的Slot中的时候，如访问在Slot-6433的Key，客户端会返回一个 <code>(error) MOVED 6433 10.211.55.4:7001</code> 这样的错误信息。Client捕获到此异常后，再自动重定向到 <code>10.211.55.4:7001</code> 这个节点上并获取数据。<br><img src="http://pics.xiezefan.me/blog/redis_cluster_slot_model.png" alt="redis_cluster_slot_mode"></p>
+<p>虽然每次请求客户端都会重新定向，但这样额外耗费多一次连接是很没有必要的，官方建议在初次建立连接后，Redis Client会获取连接集群的节点信息以及Slot分布信息，并在本地缓存一份hash slot与node关系的的路由表，当收到操作请求时，先本地用CRC16算法计算出该Key对应哪一个Slot，再在表中查询该Slot的节点信息，最后选择对应的节点去连接，这样，每次请求就不需要通过一个统一的代理层去转发请求。当服务器进行扩容，迁移数据的时候，客户端的路由表并不会立即更新，而是当在被迁移是Slot上操作的时候，因为Slot已经不在原先的节点上了，Redis Cluster返回Moved指令，告诉客户端该Slot现在所在的节点。此时，客户端应该更新自己的路由表信息，以达到最优，即每次操作直接与节点通讯并不进行跳转。<br><img src="http://pics.xiezefan.me/blog/redis_cluster_slot_model2.png" alt="redis_cluster_slot_mode"></p>
+<p>在前面我说道过，Redis Cluster预先将Key分到16384个Slot，通过CRC16算法算出Key该被分配到哪一个Slot中。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HASH_SLOT = CRC16(key) mod 16384</span><br></pre></td></tr></table></figure>
+<p>但是这么做有一个缺陷就是，如果你需要进行涉及多个key的操作的话，因为Key可能被分散到不同的节点中，所以查询请求将会在各个节点间跳转，效率会非常差，为此，Redis Cluster干脆不支持所有的多Key操作命令。<br>假如你想使用多Key操作命令，可以通过Keys Hash Tag去将相关数据强制存储在同一个slot。当一个key包含<code>{</code>和<code>}</code>的时候，Redis-Cluster会取<code>{</code>和<code>}</code>之间的字符进行<code>CRC16</code>哈希算出存放在哪个slot，比如：</p>
+<ul>
+<li><code>{user1000}.following</code>这个key会使用<code>user1000</code>的hash值</li>
+<li><code>foo{}{bar}</code>这个key会使用<code>foo{}{bar}</code>的hash值，因为第一个<code>{</code>和<code>}</code>之间的值为空</li>
+<li><code>foozap</code>这个key会使用<code>{bar</code>的hash值</li>
+<li><code>foo{bar}{zap}</code>这个key会使用<code>{bar}</code>的hash值</li>
+</ul>
+<p>但是使用Hash Tag仍然仍然会面临新的问题，因为不可避免会有些Key的Value额外的大，虽然根据概率学，当基数足够大的时候，每一个Slot的大小都会趋于平均，但实际应用中，我使用我们生产环境的一些数据进行测试，Cluster节点数目为16，测试数据集大概16G，存储数据结构为Set，每一个Key对应一个或多个Value，正常来说最终测试结果每一个节点的内存占用应该为1G，但实际上，内存使用最高与最低相差足足有200M。</p>
+<p>在集群运行的过程中，不可避免有些节点会因为各种原因挂掉（被踢掉网线，打雷，停电，软件故障&gt;_&gt;）。所以，在成本允许范围内，我们会尽量避免所有节点在同一台物理机上，避免Master，Slave在同一台物理机上，利用Redis Cluster的自动故障转移的功能，让集群在及时部分节点挂掉的情况下，仍然能继续工作。</p>
+<p>为了数据的安全性，我们一般会保持一份及以上的数据冗余。即一个Master节点对应多个Slave节点模式，当Master节点挂掉后，集群自动选择一个Slave升级为Master节点，重启原Master节点并作为Slave节点加入现有集群。</p>
+<p>而Redis Cluster是如何发现节点挂掉呢？在集群中，每一个节点之间都会保持一个长连接，即有N个节点的集群，每个节点将会保持N-1条长连接，节点定时给其他节点发送Ping指定，如果在指定的timeout内没有返回Pong，即认为该节点故障，并启动故障转移。节点timeout的时间是可以配置，但是需要明白的是，当一个节点故障的时候，他通常不能写入数据并且不能读取数据，所以节点故障到其他节点发现其故障并且进行故障转移这段时间内，写入该节点的数据可能会丢失。所以timeout时间过长意味着你将在节点故障的时候丢书过多的数据，而timeout时间过短则可能引发误判。</p>
+<p>当一个Master节点以及他的所有Slave节点都挂掉的时候，集群将处于不可用的状态，当然这是可以配置的。我们可以根据业务来决定是否打开此开关。</p>
+<h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><p>Redis在实际应用中的一些需要避免的一些坑，在Redis Cluster之中同样存在，在调研Redis Cluster与我实际测试中，总结一些别人遇到以及我自己掉入的坑。</p>
+<ul>
+<li><p>为什么Redis需要预留额外一半的内存？因为Redis的AOF实际上是通过fork一个Redis进程来实现，所以为了防止AOF集中发生，出现SWAP和OOM，所以需要预留额外的一半内存。但实际有更优的解决办法：</p>
+<ol>
+<li>关闭Redis所有自动落地，通过一个Remote控制中心来管理Redis实例，远程调用<code>BGSAVE</code>命令主动触发落地。避免同一时间落地导致内存不足。</li>
+<li>设置最大内存使用，当内存超过此阀值的时候，写入将失败，但读取仍然是正常的，可以配置告警脚本。这能最大限度保证Redis进程不会因为内存过高而挂掉。</li>
+</ol>
+</li>
+<li><p>在云风的 <a href="http://blog.codingnow.com/2014/03/mmzb_redis.html" target="_blank" rel="noopener">谈谈陌陌争霸在数据库方面踩过的坑( Redis 篇)</a> 中提到一个Redis的主从方案，即一个Master节点对应N个Slave节点，如果所有的节点都选择数据落地，每一台机器都需要预留很多内存来防止落地的时候的内存占用过高问题，但实际上这是很没有必要的，我们可以选择其中几个Slave节点进行数据落地即可。但这招在Redis Cluster是行不通的，因为Redis Cluster的故障迁移功能，默认是Master节点如果挂掉的话，Slave会自动升级为Master节点，原先的Master节点自动重启并作为Slave节点加入集群。这样如果我们在集群中指定其中几个Slave节点进行数据落地的话，当发生故障转移的时候，落地策略就会出现混乱。</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/08/13/maven_module_with_git_sub_module/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          使用Git SubModule对Maven Module进行优化
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/03/redis_cluster_research_1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Redis Cluster 初探(1) - 集群搭建与扩容</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

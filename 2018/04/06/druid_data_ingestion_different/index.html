@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Druid 几种数据摄入方式的区别 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2018/04/06/druid_data_ingestion_different/">
+  <meta name="description" content="我们在从Kafka，RabbitMQ，Storm 中摄入实时数据流时到Druid的时候，可以使用Realtime Node，Index Server，Tranquility进行数据摄入。 本文主要探索这几种数据摄入方式的区别。">
+<meta name="keywords" content="druid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Druid 几种数据摄入方式的区别">
+<meta property="og:url" content="http://yoursite.com/2018/04/06/druid_data_ingestion_different/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="我们在从Kafka，RabbitMQ，Storm 中摄入实时数据流时到Druid的时候，可以使用Realtime Node，Index Server，Tranquility进行数据摄入。 本文主要探索这几种数据摄入方式的区别。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://pics.xiezefan.me/Druid Realtime Node defects.png">
+<meta property="og:image" content="http://pics.xiezefan.me/indexing_service.png">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.387Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Druid 几种数据摄入方式的区别">
+<meta name="twitter:description" content="我们在从Kafka，RabbitMQ，Storm 中摄入实时数据流时到Druid的时候，可以使用Realtime Node，Index Server，Tranquility进行数据摄入。 本文主要探索这几种数据摄入方式的区别。">
+<meta name="twitter:image" content="http://pics.xiezefan.me/Druid Realtime Node defects.png">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-druid_data_ingestion_different" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/04/06/druid_data_ingestion_different/" class="article-date">
+  	<time datetime="2018-04-05T16:00:00.000Z" itemprop="datePublished">Apr 6 2018</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/druid/">druid</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/druid/">druid</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Druid 几种数据摄入方式的区别
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我们在从Kafka，RabbitMQ，Storm 中摄入实时数据流时到Druid的时候，可以使用Realtime Node，Index Server，Tranquility进行数据摄入。</p>
+<p>本文主要探索这几种数据摄入方式的区别。</p>
+<a id="more"></a>
+<h2 id="Realtime-Node"><a href="#Realtime-Node" class="headerlink" title="Realtime Node"></a>Realtime Node</h2><p>Realtime Node 可以直接配置Firehose从Kafka，RabbitMQ等消息队列中获取数据，数据一旦被摄入，很快就可以被查询到， 同时Realtime Node还会周期性的将摄入的数据合并成Segment，提交给DeepStorage并交由Historical Node加载，以达到提供实时数据的查询的功能。</p>
+<h3 id="Realtime-Node的局限性"><a href="#Realtime-Node的局限性" class="headerlink" title="Realtime Node的局限性"></a>Realtime Node的局限性</h3><p>但这种模式有一些缺陷</p>
+<h4 id="Kafka-摄入缺陷"><a href="#Kafka-摄入缺陷" class="headerlink" title="Kafka 摄入缺陷"></a>Kafka 摄入缺陷</h4><p>一旦Realtime Node宕机，那么该节点上未提交的数据将全部丢失。 </p>
+<p>正常这种时候我们需要使用创建 replica 副本以保证高可用，但在使用Kafka摄入数据的场景会有一些缺陷， 这里涉及到Segment的<a href="http://druid.io/docs/0.12.0/ingestion/stream-pull.html#sharding" target="_blank" rel="noopener">Shard机制</a>。</p>
+<p>简单讲，在大量数据的摄入的场景，通常一个Segment会分为多个Shard分片，每一个分片会有不同的<code>partitionNum</code>分区号。当设置了副本的时候，某个分片的副本将会拥有该分片相同的分区号。在数据查询的时候，Druid在相同分区号的分片中知会随机选择一个进行数据查询数据。</p>
+<p>而举一个具体的场景，假如在你有一个Kafka的Topic有编号为1，2，3的partitions，并且你有2个实时节点去消费这个Topic，节点1消费了partitions 1与2， 节点2消费了partitions 3。他们拥有相同的Group。<br>这时候你需要进行Replication以保证高可用，所以你启动了另外2个实时节点并以新的Kafka Topic去消费数据。 这时候看节点3可能消费了partitons 1，节点4可能消费了partitions 2与3。<br>前文提到Segment partitionNum查询的特性，这时候Druid会认为节点3与4是同一个分区，所以数据查询只会从中挑选一个节点进行查询，但很明显他们数据是不一样的。</p>
+<p><img src="http://pics.xiezefan.me/Druid Realtime Node defects.png" alt="Druid Realtime Node缺陷"></p>
+<h4 id="数据丢失风险"><a href="#数据丢失风险" class="headerlink" title="数据丢失风险"></a>数据丢失风险</h4><p>另外，假设你当前正在执行一个任务计算今日每个小时的数据汇总，同时你有一个批处理任务从离线集群获取数据重做Segment，并覆盖当前的Segment。<br>如果你在执行计算任务期间发生了Segment覆盖，那么在这个场景下很可能出现数据丢失。</p>
+<h4 id="Schema更新需重启节点"><a href="#Schema更新需重启节点" class="headerlink" title="Schema更新需重启节点"></a>Schema更新需重启节点</h4><p>在Schema更新的时候，你需要重启Realtime Node以生效新的配置，这在大规模集群管理上效率非常低。</p>
+<h2 id="Indexing-Service"><a href="#Indexing-Service" class="headerlink" title="Indexing Service"></a>Indexing Service</h2><p>以下是Druid官方的Indexing Service架构图</p>
+<p><img src="http://pics.xiezefan.me/indexing_service.png" alt="Druid Indexing Service Architecture"></p>
+<p>Indexing Service分为以下几个部分:</p>
+<ol>
+<li>Overload : 负责接收请求，分配任务给Middle Manager执行</li>
+<li>Middle Manager :  执行提交的任务的工作者节点，会将任务分发给运行在单独的JVM的Peon</li>
+<li>Peon : 指定Task的容器</li>
+<li>Task : 在Middle Manager管理的Peon下执行的任务，支持各种各样的任务如Hadoop摄入，Kafka摄入。同时开发者可以自己定制Task以满足业务需求</li>
+<li>ZooKeeper: 维护任务的信息</li>
+</ol>
+<p>简单讲Indexing Service是一套分布式任务调度系统，按计划执行数据摄入，Segment合并，压缩，删除等任务。同时支持自定义任务扩展。</p>
+<p>甚至你可以通过扩展将Indexing Service接入Autoscaling自动伸缩服务，在任务排队过长的时候，自动创建Middle Manager节点，再节点空闲的时候，自动进行缩容。</p>
+<h3 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h3><p><a href="http://druid.io/docs/0.12.0/ingestion/tasks.html#locking" target="_blank" rel="noopener">Task的锁机制</a>可以在我们进行publish segment等时候获取指定时间段的segment的排他锁或共享锁，以避免上文描述的Realtime Node Segment覆盖的时候可能产生的数据丢失风险</p>
+<h3 id="Kafka-Indexing-Service"><a href="#Kafka-Indexing-Service" class="headerlink" title="Kafka Indexing Service"></a>Kafka Indexing Service</h3><p><a href="http://druid.io/docs/0.12.0/development/extensions-core/kafka-ingestion.html" target="_blank" rel="noopener">Kafka Indexing Service</a> 是在Indexing Service上封装的一个扩展，使用Kafka自己的分区和偏移机制来读取数据，因此能够提供准确一次的服务保证。 解决Realtime Node摄入Kafka数据的缺陷。</p>
+<p>与 Tranquility 对比的好处是，他能够读取来自Kafka的非近期的数据，并且不受窗口期(window period )对其他摄取机制的影响。支持管理索引任务的状态，以协调切换，管理故障，并确保维护可扩展性和复制要求。</p>
+<p>截止至当前Druid 0.11.0 Kafka Indexing server还未完全Release，需要谨慎在生产上使用。</p>
+<h2 id="Tranquility"><a href="#Tranquility" class="headerlink" title="Tranquility"></a>Tranquility</h2><p>Tranquility 是在 Index Service 封装的一个类库，帮助我们从Kafka，Hadoop，HTTP，Storm，Samza，Spark Streaming或者自己的JVM程序发送数据给Indexing Service。</p>
+<h3 id="Tranquility-实现原理"><a href="#Tranquility-实现原理" class="headerlink" title="Tranquility 实现原理"></a>Tranquility 实现原理</h3><p>Tranquility 帮助我们解决Indexing Service在Partitioning分区， Replication副本，Service Discover服务发现，Schema rollover Schema平滑变更上的一些难题。</p>
+<p>Tranquility基于Indexing Service的EventReceiverFirehose来实现，该Firehose会暴露一个HTTP API供Tranquility实时Push数据给Indexing Service。</p>
+<p>在解决分区与副本问题上，Tranquility会给每一个Segment+ partitionNum指派一个Task来进行数据摄入，在超过Window Period后，Task将会停止接收数据并合并Segment，然后提交到Deep Storage。</p>
+<p>而副本的实现上，Tranquility将每个副本创建不同Task，相同的Segment与partitionNum，相同Segment与partitionNum的数据将会同事发给相同的副本的Task，副本的Task之间乎不通讯。</p>
+<p>当Schema发生改变的时候，在Indexing Service必须重启任务才生效。 而Tranquility的做法是只会应用到新的时间段生成的Segment，旧的Segment讲保持不变。由此时间不停机修改Schema。</p>
+<p>最后，我们通常需要启动实例进行数据处理并发送给Druid，Tranquility使用Zookeeper管理不同实例的任务协调，保证数据被正确想到相应的Task中。</p>
+<h3 id="Tranquility的缺陷"><a href="#Tranquility的缺陷" class="headerlink" title="Tranquility的缺陷"></a>Tranquility的缺陷</h3><ol>
+<li>超过Window Period的数据将会被丢弃，必须定时从离线集群中重做Segment来实现数据互补。</li>
+<li>Tranquility与Indexing Service的通讯异常会导致重试，无论是重试成功或失败，都可能导致数据丢失或者重复数据</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>Kafka Indexing Service 与 Tranquility 是官方推荐的安全的Kafka摄入数据的方式。</li>
+<li>更多使用Indexing Service起替代Realtime Node</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/09/27/nginx-502-bug-trace/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">记一次生产环境Nginx间歇性502的事故分析过程</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

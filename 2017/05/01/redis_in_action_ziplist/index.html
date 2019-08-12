@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Redis内存压缩实战 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2017/05/01/redis_in_action_ziplist/">
+  <meta name="description" content="在讨论Redis内存压缩的时候，我们需要了解一下几个Redis的相关知识。">
+<meta name="keywords" content="redis,ziplist">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis内存压缩实战">
+<meta property="og:url" content="http://yoursite.com/2017/05/01/redis_in_action_ziplist/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="在讨论Redis内存压缩的时候，我们需要了解一下几个Redis的相关知识。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://pics.xiezefan.me/14934574638948.jpg">
+<meta property="og:image" content="http://pics.xiezefan.me/14934575513141.jpg">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.390Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis内存压缩实战">
+<meta name="twitter:description" content="在讨论Redis内存压缩的时候，我们需要了解一下几个Redis的相关知识。">
+<meta name="twitter:image" content="http://pics.xiezefan.me/14934574638948.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-redis_in_action_ziplist" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/05/01/redis_in_action_ziplist/" class="article-date">
+  	<time datetime="2017-04-30T16:00:00.000Z" itemprop="datePublished">May 1 2017</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/redis/">redis</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ziplist/">ziplist</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis内存压缩实战
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在讨论Redis内存压缩的时候，我们需要了解一下几个Redis的相关知识。</p>
+<a id="more"></a>
+<h3 id="压缩列表-ziplist"><a href="#压缩列表-ziplist" class="headerlink" title="压缩列表 ziplist"></a>压缩列表 ziplist</h3><p>Redis的ziplist是用一段连续的内存来存储列表数据的一个数据结构，它的结构示例如下图</p>
+<p><img src="http://pics.xiezefan.me/14934574638948.jpg" alt="压缩列表组成示例--截图来自《Redis设计与实现》"></p>
+<ol>
+<li>zlbytes: 记录整个压缩列表使用的内存大小</li>
+<li>zltail: 记录压缩列表表尾距离起始位置有多少字节</li>
+<li>zllen: 记录压缩列表节点数量，值得注意的一点是，因为它只占了2个字节，所以最大值只能到65535，这意味着压缩列表长度大于65535的时候，就只能通过遍历整个列表来计算长度了</li>
+<li>zleng: 压缩列表末端标志位，固定值为<code>OxFF</code></li>
+<li>entry1-N: 压缩列表节点, 具体结构如下图</li>
+</ol>
+<p><img src="http://pics.xiezefan.me/14934575513141.jpg" alt="压缩列表节点组成示例--截图来自《Redis设计与实现》"></p>
+<p>其中</p>
+<ol>
+<li>previous_entry_length: 上一个节点的长度</li>
+<li>encoding: content的编码以及长度</li>
+<li>content: 节点数据</li>
+</ol>
+<p>当我们查找一个节点的时候，主要进行一下操作:</p>
+<ol>
+<li>根据zltail获取最后一个节点的位置</li>
+<li>判断当前节点是否是目标节点</li>
+<li>如果是，则返回数据</li>
+<li>如果不是，则根据previous_entry_length计算上一个节点的起始位置，然后重新进行步骤2判断</li>
+</ol>
+<p>通过上述的描述，我们可以知道，ziplist每次数据更新的复杂度大约是O(N)，因为它需要对N个节点进行内存重分配，查找一个数据的时候，复杂度是O(N)，最坏情况下需要遍历整个列表。</p>
+<h3 id="什么情况下会使用到ziplist呢？"><a href="#什么情况下会使用到ziplist呢？" class="headerlink" title="什么情况下会使用到ziplist呢？"></a>什么情况下会使用到ziplist呢？</h3><p>Redis会使用到ziplist的数据结构是Hash与List。</p>
+<p>Hash结构使用ziplist作为底层存储的两个条件是:</p>
+<ol>
+<li>所有的键与值的字符串长度都小于64字节的时候</li>
+<li>键与值对数据小于512个</li>
+</ol>
+<p>只要上述条件任何一个不满足，Redis就会自动将这个Hash对象从ziplist转换成hashtable。但这两个阈值可以通过修改配置文件中的<code>hash-max-ziplist-value</code>与<code>hash-max-ziplist-entries</code>来变更。</p>
+<p>List结构使用ziplist的条件与Hash结构一样，当条件不满足的时候，会从ziplist转换成linkedlist，同样我们可以修改<code>list-max-ziplist-value</code>与<code>hash-max-ziplist-entries</code>来使用不同的阈值。</p>
+<p>为什么Hash与List会使用ziplist来存储数据呢？</p>
+<p>因为</p>
+<ol>
+<li>ziplist会比hashtable与ziplist节省跟多的内存</li>
+<li>内存中以连续块方式保存的数据比起hashtable与linkedlist使用的链表可以更快的载入缓存中</li>
+<li>当ziplist的长度比较小的时候，从ziplist读写数据的效率比hashtable或者linkedlist的差异并不大。</li>
+</ol>
+<p>本质上，使用ziplist就是以时间换空间的一种优化，但是他的时间损坏小到几乎可以忽略不计，但却能带来可观的内存减少，所以满足条件时，Redis会使用ziplist作为Hash与List的存储结构。</p>
+<h3 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h3><p>我们先抛出问题，在广告程序化交易的过程中，我们经常需要为一个广告投放计划定制人群包，其存储的形式如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">人群包ID =&gt; [设备ID_1, 设备ID_2 ... 设备ID_N]</span><br></pre></td></tr></table></figure>
+<p>其中，人群包ID是Long型整数，设备ID是经过MD5处理，长度为32。<br>在业务场景中，我们需要判断一个设备ID是否在一个人群包中，来决定是否投放广告。</p>
+<p>在传统的使用Redis的场景, 我们可以使用标准的KV结构来存储定向包数据，则存储方式如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;人群包ID&#125;_&#123;设备ID_1&#125; =&gt; true</span><br><span class="line">&#123;人群包ID&#125;_&#123;设备ID_2&#125; =&gt; true</span><br></pre></td></tr></table></figure>
+<p>如果我们想使用ziplist来继续内存压缩的话，我们必须保证Hash对象的长度小于512，并且键值的长度小于64字节。 我们可以将KV结构的数据，存储到预先分配好的bucket中。</p>
+<p>我们先预估下，整个Redis集群预计容纳的数据条数为10亿，那么Bucket的数量的计算公式如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bucket_count = 10亿 / 512 = 195W</span><br></pre></td></tr></table></figure>
+<p>那么我们大概需要200W个Bucket(预估Bucket数量需要多预估一点，以防触发临界值问题）<br>我们先以下公式计算BucketID:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bucket_id = CRC32(人群包ID + &quot;_&quot; + 设备ID) % 200W</span><br></pre></td></tr></table></figure>
+<p>那么数据在Redis的存储结构就变成</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bucket_id =&gt; &#123;</span><br><span class="line">   &#123;人群包ID&#125;_&#123;设备ID_1&#125; =&gt; true</span><br><span class="line">   &#123;人群包ID&#125;_&#123;设备ID_2&#125; =&gt; true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们保证每个bucket中的数据项都小于512，并且长度均小于64字节。</p>
+<p>我们以2000W数据进行测试，前后两者的内存使用情况如下:</p>
+<table>
+<thead>
+<tr>
+<th>数据集大小</th>
+<th>存储模式</th>
+<th>Bucket数量</th>
+<th>所用内存</th>
+<th>碎片率</th>
+<th>Redis占用的内存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2000W</td>
+<td>压缩列表</td>
+<td>200W</td>
+<td>928M</td>
+<td>1.38</td>
+<td>1.25G</td>
+</tr>
+<tr>
+<td>2000W</td>
+<td>压缩列表</td>
+<td>5W</td>
+<td>785M</td>
+<td>1.48</td>
+<td>1.14G</td>
+</tr>
+<tr>
+<td>2000W</td>
+<td>直接存储</td>
+<td>-</td>
+<td>1.44G</td>
+<td>1.03</td>
+<td>1.48G</td>
+</tr>
+</tbody>
+</table>
+<p>在这里需要额外引入一个概念 – 内存碎片率。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">内存碎片率 = 操作系统给Redis分配的内存 / Redis存储对象占用的内存</span><br></pre></td></tr></table></figure>
+<p>因为压缩列表在更新节点的时候，经常需要进行内存重分配，所以导致比较高的内存碎片率。我们在做技术方案比较的时候，内存碎片率也是非常需要关注的指标之一。 </p>
+<p>但有很多手段可以减少内存碎片率，比如内存对其，甚至更极端的直接重做整个Redis内存（利用快照或者从节点来重做内存）都能有效的减低内存碎片率。</p>
+<p>我们在本次实验中，因为存储的数值比较大（单个KEY约34个字节），所以实际节省内存不是很多，但依然能节约35%-50%的内存使用。</p>
+<p>在实际的生产环境中，我们根据应用场景合理的设计压缩存储结构，部分业务甚至能达到节约70%的内存使用的效果。</p>
+<h3 id="压缩列表能节省多少内存？"><a href="#压缩列表能节省多少内存？" class="headerlink" title="压缩列表能节省多少内存？"></a>压缩列表能节省多少内存？</h3><p>我们现在知道压缩列表是通过将节点紧凑的排列在内存中，从而节省掉内存的。但他究竟节省了哪些内存从而能达到惊人的压缩率呢？</p>
+<p>首先为了明白这个细节，我们需要知道普通Key-Value结构在Redis中是如何存储的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">typedef struct redisObject &#123;</span><br><span class="line">    unsigned type:4;        // 对象的类型</span><br><span class="line">    unsigned encoding:4;    // 对象的编码</span><br><span class="line">    unsigned lru:LRU_BITS;  // LRU类型</span><br><span class="line">    int refcount;           // 引用计数</span><br><span class="line">    void *ptr;              // 指向底层数据结构的指针</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+<p>Redis所有的对象都是通过上述结构来存储, 假设我存储Hello=&gt;World这样一个健值对到Redis中，除了存储本身键值的数据外，还需要额外的24个字节来存储redisObject对象。</p>
+<p>而Redis存储字符串使用的SDS数据结构</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct sdshdr8 &#123;</span><br><span class="line">    uint8_t len;        // 所保存字符串的长度</span><br><span class="line">    uint8_t alloc;      // 分配的内存数量</span><br><span class="line">    unsigned char flags;// 标志位，用于判断sdshdr类型    </span><br><span class="line">    char buf[];         // 字节数组，用户保存字符串</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>假如字符串的长度无法用unsigned int8来表示的话，Redis会使用能表达更大长度的sdshdr16结构来存储字符串。</p>
+<p>并且，为了减少修改字符串带来的内存重分类问题，Redis会进行内存预分配，所以可能你仅仅为了保存五个字符，但Redis会为你预分配10 bytes的内存。</p>
+<p>这意味着当我们存储Hello这个字符串的时候，你需要额外的3个以上的字节。</p>
+<p>Oh~~~，我只想保存Hello=&gt;World这十个字符的数据，竟然需要的30~40个字节的数据来存储额外的信息，比存储数据本身的大小还多一些。这还没包括Redis维护字典表所需要的额外的内存空间。</p>
+<p>那么假设我们用ziplist来存储这个数据，我们仅仅需要额外的2个字节用于存储previous_entry_length与encoding。具体的计算方式可以参考Redis源码或者《Redis设计与实现》第一部分第7章压缩列表。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>从以上对比，我们可以看出，在存储越小的数据的时候，使用ziplist来进行数据压缩能得到更好的压缩率。<br>但副作用也很明显，ziplist的更新效率远远低于普通K-V模式，并且会造成额外的内存碎片率。</p>
+<p>在Redis中存储大量数据的实践过程中，我们经常会做一些小技巧来尽可能压榨Redis的存储能力。接下来准备写一篇Redis内存压缩的小技巧。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/09/27/nginx-502-bug-trace/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          记一次生产环境Nginx间歇性502的事故分析过程
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/04/09/elk_in_action_analyze_nginx_logs/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ELK实战 - 利用Nginx日志分析API耗时</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

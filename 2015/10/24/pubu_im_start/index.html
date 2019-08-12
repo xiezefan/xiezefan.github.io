@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>生成力工具【瀑布IM】正确使用手册 | XieZefan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:url" content="http://xiezefan.me/2015/10/24/pubu_im_start/">
+  <meta name="description" content="去年的这个时候，国外的企业协作工具Slack的报告铺天盖地，如今一年过去，Slack已经估值30亿美金，成了新的明星独角兽公司。   不过Slack毕竟作为一款境外的软件，网络访问以及语言障碍在团队内推广还是挺成问题的。而近一年来，国内也涌现出一批类Slack的国产应用。如瀑布IM，纷云，Bearychat等。">
+<meta name="keywords" content="tools">
+<meta property="og:type" content="article">
+<meta property="og:title" content="生成力工具【瀑布IM】正确使用手册">
+<meta property="og:url" content="http://yoursite.com/2015/10/24/pubu_im_start/index.html">
+<meta property="og:site_name" content="XieZefan&#39;s Blog">
+<meta property="og:description" content="去年的这个时候，国外的企业协作工具Slack的报告铺天盖地，如今一年过去，Slack已经估值30亿美金，成了新的明星独角兽公司。   不过Slack毕竟作为一款境外的软件，网络访问以及语言障碍在团队内推广还是挺成问题的。而近一年来，国内也涌现出一批类Slack的国产应用。如瀑布IM，纷云，Bearychat等。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/tower_screen.png">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/pubu_im_screen.png?t=1">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/pubu_im_files_collection.jpg">
+<meta property="og:image" content="http://pics.xiezefan.me/blog/pubu_im_custom_service.png">
+<meta property="og:updated_time" content="2019-08-12T15:05:35.390Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="生成力工具【瀑布IM】正确使用手册">
+<meta name="twitter:description" content="去年的这个时候，国外的企业协作工具Slack的报告铺天盖地，如今一年过去，Slack已经估值30亿美金，成了新的明星独角兽公司。   不过Slack毕竟作为一款境外的软件，网络访问以及语言障碍在团队内推广还是挺成问题的。而近一年来，国内也涌现出一批类Slack的国产应用。如瀑布IM，纷云，Bearychat等。">
+<meta name="twitter:image" content="http://pics.xiezefan.me/blog/tower_screen.png">
+  
+    <link rel="alternative" href="/atom.xml" title="XieZefan&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-135031117-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-135031117-1');
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="http://pics.xiezefan.me/avatar.jpg">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+		</hgroup>
+
+		
+
+		
+			<div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div>
+		
+
+		<div class="switch-area">
+			<section class="first-part">
+				<nav class="header-menu">
+					<ul>
+					
+						<li><a href="/">主页</a></li>
+			        
+						<li><a href="/archives">所有文章</a></li>
+			        
+						<li><a href="/categories/tips/">常用</a></li>
+			        
+					</ul>
+				</nav>
+				<nav class="header-nav">
+					<div class="social">
+						
+							<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+				        
+							<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+				        
+					</div>
+				</nav>
+			</section>
+			
+			
+			<section class="second-part">
+				<div class="widget tagcloud">
+					<a href="/tags/agenda/" style="font-size: 10px;">agenda</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/druid/" style="font-size: 10px;">druid</a> <a href="/tags/elk/" style="font-size: 13.33px;">elk</a> <a href="/tags/git/" style="font-size: 13.33px;">git</a> <a href="/tags/gork/" style="font-size: 13.33px;">gork</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jdk/" style="font-size: 10px;">jdk</a> <a href="/tags/keepalive/" style="font-size: 10px;">keepalive</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/maven/" style="font-size: 16.67px;">maven</a> <a href="/tags/mqtt/" style="font-size: 10px;">mqtt</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 16.67px;">redis</a> <a href="/tags/spring-test/" style="font-size: 10px;">spring-test</a> <a href="/tags/sublime-text/" style="font-size: 10px;">sublime-text</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a>
+				</div>
+			</section>
+			
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="http://pics.xiezefan.me/avatar.jpg">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Xie Zefan</a></h1>
+			</hgroup>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/tips/">常用</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/xiezefan" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/xiezefan" title="weibo">weibo</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-pubu_im_start" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/10/24/pubu_im_start/" class="article-date">
+  	<time datetime="2015-10-23T16:00:00.000Z" itemprop="datePublished">Oct 24 2015</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools/">tools</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tools/">tools</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      生成力工具【瀑布IM】正确使用手册
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>去年的这个时候，国外的企业协作工具<a href="https://slack.com/" target="_blank" rel="noopener">Slack</a>的报告铺天盖地，如今一年过去，Slack已经估值30亿美金，成了新的明星独角兽公司。  </p>
+<p>不过Slack毕竟作为一款境外的软件，网络访问以及语言障碍在团队内推广还是挺成问题的。而近一年来，国内也涌现出一批类Slack的国产应用。如<a href="https://beta.pubu.im/" target="_blank" rel="noopener">瀑布IM</a>，<a href="https://lesschat.com/" target="_blank" rel="noopener">纷云</a>，<a href="https://bearychat.com" target="_blank" rel="noopener">Bearychat</a>等。</p>
+<a id="more"></a>
+<p>先简单介绍下我们团队的现状，目前我们使用Gitlab + Tower.im + 瀑布IM，团队成员提交Pull Request后，需要其他成员Review才能合并进Master分支。而项目正处于前期开发阶段，对BUG的收集整理并不需要像生产环境的项目一样走一个复杂的流程，所以我们使用Tower.im来进行项目任务管理与BUG追踪。 </p>
+<p><img src="http://pics.xiezefan.me/blog/tower_screen.png" alt="Tower.im">  </p>
+<p>无意中在Tower.im的主页上看到瀑布IM的介绍，试用了下效果非常不错，推广到整个开发小组，组内成员普遍好评，简单地设置了WebHooks就接入了Gitlab与Tower.im， 小组成员提交了代码，创建Pull Request，在Tower上创建/讨论/完成任务，第一时间在瀑布IM上就可以收到消息，这在团队密切协作的时候特别有用，你能快速地了解到，你的队友在做什么。所有地碎片化消息都统一地在一个平台内展示。</p>
+<p><img src="http://pics.xiezefan.me/blog/pubu_im_screen.png?t=1" alt="Pubu.im Screen"></p>
+<p>在以往，我们用QQ群，QQ讨论组做团队沟通，有时候很无奈，QQ上掺杂着很多私人的关系在上面，工作时候的确会有一些干扰，瀑布IM的组内讨论，体验上虽然有些许比不上QQ，但作为工作讨论可以屏蔽掉很多干扰。并且我很喜欢其中的一个功能，瀑布IM会收集团队聊天中的图片，文件，代码片段，特别是链接片段，这无疑是一个需求痛点，工作中，我经常翻好几页聊天记录去找同事N天前发给我的测试页面的链接。</p>
+<p><img src="http://pics.xiezefan.me/blog/pubu_im_files_collection.jpg" alt="Pubu.im Files Collection"></p>
+<h3 id="自定义扩展"><a href="#自定义扩展" class="headerlink" title="自定义扩展"></a>自定义扩展</h3><p>瀑布IM也提供了自定义扩展，方便有开发能力的用户接入内部的管理系统，其主要有</p>
+<p>输出类：</p>
+<ul>
+<li>Command命令</li>
+<li>Outgoing</li>
+</ul>
+<p>接入类：</p>
+<ul>
+<li>代收邮件</li>
+<li>Incomming</li>
+</ul>
+<p>输出类定义一个聊天事件，当聊天事件触发的时候，会往你指定的URL POST一些数据，接入类则通过设置Webhooks，当事件触发时，开发者主动调用Webhoods发送数据向指定渠道推送消息。 </p>
+<p>我试验了一下<a href="https://blog.pubu.im/how-to-add-incoming/" target="_blank" rel="noopener">Incoming服务</a>，背景是这样，当一个用户支付了订单时候，服务端会进行一些Webhookds回调，正常情况下，我需要编写一个程序以查看回调通知的内容，在此之前，我使用纷云的开源Webhooks调试框架 - <a href="http://request.lesschat.com/" target="_blank" rel="noopener">Request</a>，为了试验瀑布IM的Incoming服务，我用Nodejs编写了一个简单的转发Webhooks的程序，当收到回调后，程序格式化文本并调用瀑布IM的回调接口。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">request(&#123;</span><br><span class="line">    uri: <span class="string">'https://hooks.pubu.im/services/xxxxxxx'</span>,</span><br><span class="line">    method: <span class="string">'POST'</span>,</span><br><span class="line">    json: &#123;<span class="attr">text</span>:text, <span class="attr">attachments</span>:attachments, <span class="attr">displayUser</span>:displayUser&#125;,</span><br><span class="line">    headers : &#123;<span class="string">'Content-Type'</span> : <span class="string">'application/json'</span>&#125;</span><br><span class="line">&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">err, rep</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">console</span>.log(err);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="built_in">JSON</span>.stringify(rep.body));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><img src="http://pics.xiezefan.me/blog/pubu_im_custom_service.png" alt="Pubu.im Custom Service">  </p>
+<p>有一点需要吐槽的是，瀑布IM提供的API有一个BUG，当未指定<code>Content-Type=application/json</code>的时候，API会抛500异常，回复邮件反馈也不是很迅速，最后还是我自己找到原因的。不过考虑到目前该产品仍然处于Beta版本，还是可以理解的。另外，在JSON中使用驼峰式命名是很不专业的行为呀。</p>
+<h3 id="额外的话"><a href="#额外的话" class="headerlink" title="额外的话"></a>额外的话</h3><p>昨天和一位跳槽某大型互联网公司的前同事聊天，他同我吐槽说公司对第三方生成力工具很克制，禁止员工使用其他第三方平台提供管理工具，理由不外乎信息安全，而一般大型互联网公司的内部工具难免跟不上时代，效率上总有些瑕疵。像Tower.im，Teambition，瀑布IM这些工具想在内部推广阻力重重，而反倒乎创业团队，无须考虑太多这些事情，执行力也高，能第一时间体验这些提供工作效率的生产力工具。只不过在国内的大环境下，如何探索出一套可行的商业模式当下还是路漫漫。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/12/03/redis_cluster_research_1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          Redis Cluster 初探(1) - 集群搭建与扩容
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/07/07/android-annotations-start/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Android 封装SDK时常用的注解</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<!-- 来必力City版安装代码 -->
+<div style="padding:40px" id="lv-container" data-id="city" data-uid="MTAyMC8yODE0MS80NzE0">
+    <script type="text/javascript">
+   (function(d, s) {
+       var j, e = d.getElementsByTagName(s)[0];
+
+       if (typeof LivereTower === 'function') { return; }
+
+       j = d.createElement(s);
+       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+       j.async = true;
+
+       e.parentNode.insertBefore(j, e);
+   })(document, 'script');
+    </script>
+<noscript> 为正常使用来必力评论功能请激活JavaScript</noscript>
+</div>
+<!-- City版安装代码已完成 -->
+
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Xie Zefan
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ad58d5ec90b9cb7da4e0c2ff3e3cb223";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+</footer>
+
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+  <script src="/js/main.js"></script>
+
+  </div>
+</body>
+</html>

@@ -126,7 +126,7 @@ Gork表达式需要一定的学习成本，但有了它，我们可以更方便�
 
 我们在Kibana中建立该索引，可以看到，日志的关键数据已经成功被提取并存入到ElasticSearch。接下来，我们将利用Kibana来统计报表。
 
-![](http://res.xiezefan.me/images/blog/elk_in_action_kibana_chart)
+![](http://pics.xiezefan.me/blog/elk_in_action_kibana_chart)
 
 
 在Kibana绘制图标本身什么技术难度，关键一点是在将数据写入ElasticSearch中的时候，需要将一些关键指标转换成数值类型，我们可以在Grok转换的时候，指定生成Number类型，或者之间预定义相关业务的ElasticSearch Mapping Template。

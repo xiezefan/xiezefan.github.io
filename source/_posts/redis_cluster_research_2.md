@@ -13,11 +13,11 @@ tags:
 <!-- more -->
 
 Redis Cluster是无中心节点的设计，Client可以连接集群中的任一一个节点，当操作的Key不在该节点的Slot中的时候，如访问在Slot-6433的Key，客户端会返回一个 `(error) MOVED 6433 10.211.55.4:7001` 这样的错误信息。Client捕获到此异常后，再自动重定向到 `10.211.55.4:7001` 这个节点上并获取数据。
-![redis_cluster_slot_mode](http://pics.xiezefan.me/blog/redis_cluster_slot_model.png)
+![redis_cluster_slot_mode](/images/redis_cluster_slot_model.png)
 
 
 虽然每次请求客户端都会重新定向，但这样额外耗费多一次连接是很没有必要的，官方建议在初次建立连接后，Redis Client会获取连接集群的节点信息以及Slot分布信息，并在本地缓存一份hash slot与node关系的的路由表，当收到操作请求时，先本地用CRC16算法计算出该Key对应哪一个Slot，再在表中查询该Slot的节点信息，最后选择对应的节点去连接，这样，每次请求就不需要通过一个统一的代理层去转发请求。当服务器进行扩容，迁移数据的时候，客户端的路由表并不会立即更新，而是当在被迁移是Slot上操作的时候，因为Slot已经不在原先的节点上了，Redis Cluster返回Moved指令，告诉客户端该Slot现在所在的节点。此时，客户端应该更新自己的路由表信息，以达到最优，即每次操作直接与节点通讯并不进行跳转。
-![redis_cluster_slot_mode](http://pics.xiezefan.me/blog/redis_cluster_slot_model2.png)
+![redis_cluster_slot_mode](/images/redis_cluster_slot_model2.png)
 
 在前面我说道过，Redis Cluster预先将Key分到16384个Slot，通过CRC16算法算出Key该被分配到哪一个Slot中。
 

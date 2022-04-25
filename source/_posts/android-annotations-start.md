@@ -86,9 +86,9 @@ public Context getContext() {return null;}
 
 
 
-[1]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_anination_class.png
-[2]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip.png
-[3]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/int_def_error_tip2.png
-[4]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/drawable_res_error_tip.png
-[5]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/non_null_waring_tip.png
-[6]: http://7jpp6b.com1.z0.glb.clouddn.com/blog/nullable_waring_tip.png
+[1]: /images/int_def_anination_class.png
+[2]: /images/int_def_error_tip.png
+[3]: /images/int_def_error_tip2.png
+[4]: /images/drawable_res_error_tip.png
+[5]: /images/non_null_waring_tip.png
+[6]: /images/nullable_waring_tip.png

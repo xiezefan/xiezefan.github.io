@@ -3,9 +3,9 @@ layout: post
 title: "Android 封装SDK时常用的注解"
 date: 2015-07-07
 categories:
-- android
+- Technical
 tags:
-- android
+- Android
 
 ---
 

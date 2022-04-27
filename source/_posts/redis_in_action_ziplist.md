@@ -3,10 +3,10 @@ layout: post
 title: "Redis内存压缩实战"
 date: 2017-05-01
 categories:
-- redis
+- Technical
 tags:
-- redis
-- ziplist
+- Redis
+- Ziplist
 
 ---
 

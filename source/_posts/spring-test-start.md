@@ -3,9 +3,9 @@ layout: post
 title: "使用Spring Test编写单元测试"
 date: 2015-01-06
 categories: 
-- java
+- Technical
 tags: 
-- spring-test
+- Java
 description: "用Spring Test的话, 可以指定在测试用例执行完毕后,对数据库进行回滚操作"
 
 ---

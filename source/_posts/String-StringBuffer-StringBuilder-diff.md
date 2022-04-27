@@ -3,9 +3,9 @@ layout: post
 title: "String，StringBuffer，StringBuilder的区别"
 date: 2014-05-19
 categories:
-- java
+- Technical
 tags:
-- java
+- Java
 desciption: String，StringBuffer，StringBuilder的区别
 
 ---

@@ -3,10 +3,10 @@ layout: post
 title: "ELK实战 - Grok简易入门"
 date: 2017-04-09
 categories:
-- elk
+- Technical
 tags:
-- elk
-- gork
+- ELK
+- Gork
 
 ---
 

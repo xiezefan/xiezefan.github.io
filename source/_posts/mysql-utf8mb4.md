@@ -3,9 +3,9 @@ layout: post
 title: "MySQL解决插入emoji表情失败的问题"
 date: 2015-02-03
 categories:
-- mysql
+- Technical
 tags:
-- mysql
+- Mysql
 
 ---
 

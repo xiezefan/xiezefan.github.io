@@ -3,9 +3,9 @@ layout: post
 title: "HashMap,HashTable区别"
 date: 2014-05-19
 categories:
-- java
+- Technical
 tags:
-- java
+- Java
 description: 实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap
 
 ---

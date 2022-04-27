@@ -3,9 +3,9 @@ layout: post
 title: "Ubuntu快速安装Sublime-Text"
 date: 2014-10-05
 categories:
-- tips
+- Technical
 tags:
-- sublime-text
+- Sublime-text
 ---
 
 

@@ -3,10 +3,10 @@ layout: post
 title: "使用Git SubModule对Maven Module进行优化"
 date: 2016-8-13
 categories:
-- maven
+- Technical
 tags:
-- maven
-- git
+- Maven
+- Git
 description: 这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。
 ---
 

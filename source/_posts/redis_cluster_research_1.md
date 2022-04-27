@@ -3,9 +3,9 @@ layout: post
 title: "Redis Cluster 初探(1) - 集群搭建与扩容"
 date: 2015-12-03
 categories:
-- Database
+- Technical
 tags:
-- redis
+- Redis
 ---
 
 Redis Cluster是Redis官方的集群实现方案，在此之前已经有一些民间的第三方Redis集群解决方案，如Twitter的Twenproxy，豌豆荚的Codis，与其不同的是，Redis Cluster并非使用Porxy的模式来连接集群节点，而是使用无中心节点的模式来组建集群，有一定性能优势也有缺点，本文主要是我调研Redis Cluster的一些知识整理与经验汇总。

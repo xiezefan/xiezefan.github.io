@@ -3,10 +3,10 @@ layout: post
 title: "MQTT 基础知识"
 date: 2014-12-29
 categories:
-- mqtt
+- Technical
 tags:
-- mqtt 
-- im
+- MQTT 
+- IM
 
 ---
 

@@ -3,9 +3,9 @@ layout: post
 title: "Agenda笔记"
 date: 2014-12-29
 categories:
-- nodejs
+- Technical
 tags:
-- agenda
+- Agenda
 
 ---
 

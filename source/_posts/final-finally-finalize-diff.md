@@ -3,9 +3,9 @@ layout: post
 title: "final, finally, finalize的区别"
 date: 2014-05-19
 categories:
-- java
+- Technical
 tags:
-- java
+- Java
 description:  final, finally, finalize的区别
 
 ---

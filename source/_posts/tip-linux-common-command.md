@@ -3,9 +3,9 @@ layout: post
 title: "Linux常用命令"
 date: 2014-10-05
 categories:
-- tips
+- Technical
 tags:
-- linux 
+- Linux 
 ---
 
 

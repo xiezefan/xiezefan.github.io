@@ -3,9 +3,9 @@ layout: post
 title: "sleep(), wait()的区别"
 date: 2014-05-19
 categories:
-- java
+- Technical
 tags:
-- java
+- Java
 
 ---
 

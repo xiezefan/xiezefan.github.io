@@ -3,9 +3,9 @@ layout: post
 title: "Redis Cluster 初探(2) - 运行规制"
 date: 2015-12-13
 categories:
-- Database
+- Technical
 tags:
-- redis
+- Redis
 ---
 
 上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。

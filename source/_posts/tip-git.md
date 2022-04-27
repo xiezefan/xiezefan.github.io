@@ -3,9 +3,9 @@ layout: post
 title: "Git常用命令集"
 date: 2014-10-05
 categories:
-- tips
+- Technical
 tags:
-- git
+- Git
 ---
 
 

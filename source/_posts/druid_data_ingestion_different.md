@@ -3,9 +3,9 @@ layout: post
 title: "Druid 几种数据摄入方式的区别"
 date: 2018-04-06
 categories:
-- druid
+- Technical
 tags:
-- druid
+- Druid
 ---
 
 

@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>使用Git SubModule对Maven Module进行优化 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">使用Git SubModule对Maven Module进行优化</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">使用Git SubModule对Maven Module进行优化</h1><div class="post-meta">2016-08-13<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2016/08/13/maven_module_with_git_sub_module/" href="/2016/08/13/maven_module_with_git_sub_module/#disqus_thread"></a><div class="post-content"><p>这篇文章主要讲，如何将Maven Module功能与Git SubModule功能配合使用的问题。</p>
+<p>之所以有这篇文章，是因为在使用Maven管理Java项目的过程中，当项目逐渐发展到一点规模后，我们将项目进行模块划分，将不同业务功能拆分为不同的Maven Module，模块之间有依赖关系，但可以分开部署。</p>
+<p>但紧随而来的问题是：</p>
+<ol>
+<li>当项目模块越来越多的时候，项目的编译时间越来越长</li>
+<li>我们使用Gitlab CI做持续集成与持续交付。 Gitlab CI的持续集成与交付的是由每次Commit与每次Release Tag触发的。也就是说，每次触发CI的时候，各个模块都需要跑一边集成测试，而更麻烦的在于，无法使用Gitlab CI直接对项目进行自动部署，因为你不能每次发布的时候，都将所有的子模块都部署一遍。</li>
+</ol>
+<span id="more"></span>
+
+<p>为了应对这个问题，显然我们需要将项目进行拆分，按部署单元将拆分为不同的Git Repository。常规的做法是将项目中公共的模块抽取成独立的Maven Dependency。 打包发布到私有的Maven仓库。但这显然太繁琐了，因为项目迭代开发过程中，即使是公共的模块，也会频繁的变更，每次变更其余依赖模块都需要升级版本。</p>
+<p>自此终于引出文本的主题，如何使用Git SubModule与Maven Module来优雅的解决上述问题。</p>
+<h3 id="Maven-Module-拆分示例"><a href="#Maven-Module-拆分示例" class="headerlink" title="Maven Module 拆分示例"></a>Maven Module 拆分示例</h3><p>我们以一个Blog后台的API项目作为示例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── dashboard-api       // Blog管理后台API模块</span><br><span class="line">│   └── pom.xml</span><br><span class="line">├── blog-api            // Blog前端的API模块</span><br><span class="line">│   └── pom.xml</span><br><span class="line">├── blog-common         // Blog系统的公共代码，如Entity，Util，Helper等逻辑</span><br><span class="line">│   └── pom.xml</span><br><span class="line">└── pom.xml</span><br></pre></td></tr></table></figure>
+
+<p>dashboard-api与blog-api都依赖blog-common，但两个模块最终都会打成独立的包分开部署。</p>
+<p><strong>PS: 显然一个Blog系统不需要做这么细致的模块划分，这里只是举例子方便大家理解。</strong></p>
+<p>我们的目标是将该项目拆分为3个Git Repositories:</p>
+<ol>
+<li>blog-common</li>
+<li>blog-api</li>
+<li>blog-dashboard-api</li>
+</ol>
+<p>首先我们将blog-common项目拆分出来</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd blog-common</span><br><span class="line">git init</span><br><span class="line">git remote add origin git@your-repository.com:xiezefan/blog-common.git</span><br><span class="line">git add .</span><br><span class="line">git commit</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们将为blog-api独立成一个新的项目，并将blog-common设置为blog-api的子模块</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir blog-api</span><br><span class="line">cp -rf my-blog/blog-api blog-api/api</span><br><span class="line">cp my-blog/pom.xml blog-api/</span><br><span class="line"></span><br><span class="line">cd blog-api</span><br><span class="line">git submodule add -b master git@your-repository.com:xiezefan/blog-common.git</span><br></pre></td></tr></table></figure>
+
+<p>这时候blog-api项目下将会生成<code>.gitmodule</code>文件，该文件对本项目的Git子模块进行声明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// .gitmodule</span><br><span class="line">submodule [&quot;blog-common&quot;]</span><br><span class="line">        path = blog-common</span><br><span class="line">        url = git@your-repository.com:xiezefan/blog-common.git</span><br><span class="line">        branch = master</span><br></pre></td></tr></table></figure>
+
+<p>接着我们编辑根目录下的pom.xml文件，声明<code>blog-common</code>, <code>api</code> 两个子模块</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// pom.xml</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">modules</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">module</span>&gt;</span>blog-common<span class="tag">&lt;/<span class="name">module</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">module</span>&gt;</span>api<span class="tag">&lt;/<span class="name">module</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">modules</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>最后在<code>api</code>模块中，将<code>blog-common</code>进行引入即可。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// api/pom.xml</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>me.xiezefan.blog<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>blog-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>在此大功告成，此时项目的目录结构应为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── blog-api</span><br><span class="line">    ├── .gitmodule</span><br><span class="line">    ├── .gitignore</span><br><span class="line">    ├── api</span><br><span class="line">    │   └── pom.xml</span><br><span class="line">    ├── blog-common</span><br><span class="line">    │   └── pom.xml</span><br><span class="line">    └── pom.xml</span><br></pre></td></tr></table></figure>
+
+<p>我们可以执行<code>mvn clean package</code>进行打包看看拆分是否成功。 依据同样的方法，我们可以对blog-dashboard-api进行拆分。 </p>
+<h3 id="如何使用Git-SubModule"><a href="#如何使用Git-SubModule" class="headerlink" title="如何使用Git SubModule"></a>如何使用Git SubModule</h3><p>因为blog-commmon本身是一个独立的项目，我们每次对其进行修改后，只需要在这模块中执行常规的git提交命令即可对模块进行更新。</p>
+<p>而对子模块的更新也有些许不同，当开发者第一次checkout带子模块的项目的时候，需要额外执行子模块检出命令。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git clone </span><br><span class="line">git@your-repository.com:xiezefan/blog-api.git</span><br><span class="line"></span><br><span class="line">cd blog-api</span><br><span class="line">git submodule init</span><br><span class="line">git submodule update --remote</span><br></pre></td></tr></table></figure>
+
+<p>此后，每次需要对子模块进行更新的时候，只需要执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule update --remote</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h3><p>之所以研究Git Module来对Maven的项目结构进行优化，主要是因为在使用Gitlab CI进行持续集成过程中，面对一个项目中有多个模块的情况下，持续集成无法对子模块进行按需部署。</p>
+<p>为了解决这个问题，我一开始的思路是在CI脚本中编写逻辑判断，然后使用Gitlab Triggering API触发CI脚本并传入不同参数来选择部署不同的子模块。但这个解决方案还需要有一个定制的控制台来选择触发指定模块以及指定版本。</p>
+<p>对于创业公司永远不足的人力面前，最忌讳就是盲目造轮子。所以后来我选择的Git Module模块来解决这个问题，虽然会照成多出大量的Git Repositories的负作用，但这显然比造一个轮子来的经济实惠。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a target="_blank" rel="noopener" href="http://alex.nederlof.com/blog/2013/07/08/using-git-submodules-for-maven-artifacts-not-in-central/">Using Git Submodules for Maven Artifacts Not in Central</a></li>
+<li><a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2/Git-%E5%B7%A5%E5%85%B7-%E5%AD%90%E6%A8%A1%E5%9D%97">Git 工具 - 子模块</a></li>
+</ul>
+<blockquote>
+<p>本文首发 : <a href="http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/">http://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/</a></p>
+</blockquote>
+</div><div class="tags"><a href="/tags/Maven"><i class="fa fa-tag">Maven</i></a><a href="/tags/Git"><i class="fa fa-tag">Git</i></a></div><div class="post-nav"><a class="pre" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a><a class="next" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2016/08/13/maven_module_with_git_sub_module/',
+    url: 'https://xiezefan.me/2016/08/13/maven_module_with_git_sub_module/',
+    title: '使用Git SubModule对Maven Module进行优化',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

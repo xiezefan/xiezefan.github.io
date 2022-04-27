@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>Redis Cluster 初探(2) - 运行规制 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Redis Cluster 初探(2) - 运行规制</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Redis Cluster 初探(2) - 运行规制</h1><div class="post-meta">2015-12-13<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2015/12/13/redis_cluster_research_2/" href="/2015/12/13/redis_cluster_research_2/#disqus_thread"></a><div class="post-content"><p>上一篇文章我们说过，Redis Cluster 采用Smart Client的方式，避免与节点的通讯还需要通过一层Proxy，以达到性能地提升。 Smart Client的优点与缺点网上也有很多人在讨论，我们现在来了解下Redis Client的运行规制。</p>
+<span id="more"></span>
+
+<p>Redis Cluster是无中心节点的设计，Client可以连接集群中的任一一个节点，当操作的Key不在该节点的Slot中的时候，如访问在Slot-6433的Key，客户端会返回一个 <code>(error) MOVED 6433 10.211.55.4:7001</code> 这样的错误信息。Client捕获到此异常后，再自动重定向到 <code>10.211.55.4:7001</code> 这个节点上并获取数据。<br><img src="/images/redis_cluster_slot_model.png" alt="redis_cluster_slot_mode"></p>
+<p>虽然每次请求客户端都会重新定向，但这样额外耗费多一次连接是很没有必要的，官方建议在初次建立连接后，Redis Client会获取连接集群的节点信息以及Slot分布信息，并在本地缓存一份hash slot与node关系的的路由表，当收到操作请求时，先本地用CRC16算法计算出该Key对应哪一个Slot，再在表中查询该Slot的节点信息，最后选择对应的节点去连接，这样，每次请求就不需要通过一个统一的代理层去转发请求。当服务器进行扩容，迁移数据的时候，客户端的路由表并不会立即更新，而是当在被迁移是Slot上操作的时候，因为Slot已经不在原先的节点上了，Redis Cluster返回Moved指令，告诉客户端该Slot现在所在的节点。此时，客户端应该更新自己的路由表信息，以达到最优，即每次操作直接与节点通讯并不进行跳转。<br><img src="/images/redis_cluster_slot_model2.png" alt="redis_cluster_slot_mode"></p>
+<p>在前面我说道过，Redis Cluster预先将Key分到16384个Slot，通过CRC16算法算出Key该被分配到哪一个Slot中。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HASH_SLOT = CRC16(key) mod 16384 </span><br></pre></td></tr></table></figure>
+
+<p>但是这么做有一个缺陷就是，如果你需要进行涉及多个key的操作的话，因为Key可能被分散到不同的节点中，所以查询请求将会在各个节点间跳转，效率会非常差，为此，Redis Cluster干脆不支持所有的多Key操作命令。<br>假如你想使用多Key操作命令，可以通过Keys Hash Tag去将相关数据强制存储在同一个slot。当一个key包含<code>&#123;</code>和<code>&#125;</code>的时候，Redis-Cluster会取<code>&#123;</code>和<code>&#125;</code>之间的字符进行<code>CRC16</code>哈希算出存放在哪个slot，比如：</p>
+<ul>
+<li><code>&#123;user1000&#125;.following</code>这个key会使用<code>user1000</code>的hash值</li>
+<li><code>foo&#123;&#125;&#123;bar&#125;</code>这个key会使用<code>foo&#123;&#125;&#123;bar&#125;</code>的hash值，因为第一个<code>&#123;</code>和<code>&#125;</code>之间的值为空</li>
+<li><code>foo&#123;&#123;bar&#125;&#125;zap</code>这个key会使用<code>&#123;bar</code>的hash值</li>
+<li><code>foo&#123;bar&#125;&#123;zap&#125;</code>这个key会使用<code>&#123;bar&#125;</code>的hash值</li>
+</ul>
+<p>但是使用Hash Tag仍然仍然会面临新的问题，因为不可避免会有些Key的Value额外的大，虽然根据概率学，当基数足够大的时候，每一个Slot的大小都会趋于平均，但实际应用中，我使用我们生产环境的一些数据进行测试，Cluster节点数目为16，测试数据集大概16G，存储数据结构为Set，每一个Key对应一个或多个Value，正常来说最终测试结果每一个节点的内存占用应该为1G，但实际上，内存使用最高与最低相差足足有200M。</p>
+<p>在集群运行的过程中，不可避免有些节点会因为各种原因挂掉（被踢掉网线，打雷，停电，软件故障&gt;_&gt;）。所以，在成本允许范围内，我们会尽量避免所有节点在同一台物理机上，避免Master，Slave在同一台物理机上，利用Redis Cluster的自动故障转移的功能，让集群在及时部分节点挂掉的情况下，仍然能继续工作。</p>
+<p>为了数据的安全性，我们一般会保持一份及以上的数据冗余。即一个Master节点对应多个Slave节点模式，当Master节点挂掉后，集群自动选择一个Slave升级为Master节点，重启原Master节点并作为Slave节点加入现有集群。</p>
+<p>而Redis Cluster是如何发现节点挂掉呢？在集群中，每一个节点之间都会保持一个长连接，即有N个节点的集群，每个节点将会保持N-1条长连接，节点定时给其他节点发送Ping指定，如果在指定的timeout内没有返回Pong，即认为该节点故障，并启动故障转移。节点timeout的时间是可以配置，但是需要明白的是，当一个节点故障的时候，他通常不能写入数据并且不能读取数据，所以节点故障到其他节点发现其故障并且进行故障转移这段时间内，写入该节点的数据可能会丢失。所以timeout时间过长意味着你将在节点故障的时候丢书过多的数据，而timeout时间过短则可能引发误判。</p>
+<p>当一个Master节点以及他的所有Slave节点都挂掉的时候，集群将处于不可用的状态，当然这是可以配置的。我们可以根据业务来决定是否打开此开关。</p>
+<h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><p>Redis在实际应用中的一些需要避免的一些坑，在Redis Cluster之中同样存在，在调研Redis Cluster与我实际测试中，总结一些别人遇到以及我自己掉入的坑。</p>
+<ul>
+<li><p>为什么Redis需要预留额外一半的内存？因为Redis的AOF实际上是通过fork一个Redis进程来实现，所以为了防止AOF集中发生，出现SWAP和OOM，所以需要预留额外的一半内存。但实际有更优的解决办法：</p>
+<ol>
+<li>关闭Redis所有自动落地，通过一个Remote控制中心来管理Redis实例，远程调用<code>BGSAVE</code>命令主动触发落地。避免同一时间落地导致内存不足。</li>
+<li>设置最大内存使用，当内存超过此阀值的时候，写入将失败，但读取仍然是正常的，可以配置告警脚本。这能最大限度保证Redis进程不会因为内存过高而挂掉。</li>
+</ol>
+</li>
+<li><p>在云风的 <a target="_blank" rel="noopener" href="http://blog.codingnow.com/2014/03/mmzb_redis.html">谈谈陌陌争霸在数据库方面踩过的坑( Redis 篇)</a> 中提到一个Redis的主从方案，即一个Master节点对应N个Slave节点，如果所有的节点都选择数据落地，每一台机器都需要预留很多内存来防止落地的时候的内存占用过高问题，但实际上这是很没有必要的，我们可以选择其中几个Slave节点进行数据落地即可。但这招在Redis Cluster是行不通的，因为Redis Cluster的故障迁移功能，默认是Master节点如果挂掉的话，Slave会自动升级为Master节点，原先的Master节点自动重启并作为Slave节点加入集群。这样如果我们在集群中指定其中几个Slave节点进行数据落地的话，当发生故障转移的时候，落地策略就会出现混乱。</p>
+</li>
+</ul>
+</div><div class="tags"><a href="/tags/Redis"><i class="fa fa-tag">Redis</i></a></div><div class="post-nav"><a class="pre" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a><a class="next" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2015/12/13/redis_cluster_research_2/',
+    url: 'https://xiezefan.me/2015/12/13/redis_cluster_research_2/',
+    title: 'Redis Cluster 初探(2) - 运行规制',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

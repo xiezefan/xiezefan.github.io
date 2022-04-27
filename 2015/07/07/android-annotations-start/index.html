@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>Android 封装SDK时常用的注解 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Android 封装SDK时常用的注解</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Android 封装SDK时常用的注解</h1><div class="post-meta">2015-07-07<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2015/07/07/android-annotations-start/" href="/2015/07/07/android-annotations-start/#disqus_thread"></a><div class="post-content"><p>工作中，我们经常需要将功能模块封装成库供合作厂商调用， 如何写好一个健壮的Android Library有很多讲究，使用注解可以对SDK暴露给开发者的接口做出一些限制，从而尽可能地避免开发者错误地使用API。 下面我们介绍几种封装SDK时常用到的注解。</p>
+<span id="more"></span>
+
+<h3 id="IntDef与StringDef"><a href="#IntDef与StringDef" class="headerlink" title="IntDef与StringDef"></a>IntDef与StringDef</h3><p>我们有时候会使用int常量或者String常量来代替枚举， 特别在你编写SDK的时候，你可以通过IntDef或者StringDef来限制接口可接受的参数。  </p>
+<p>比如，有一个 <code>disableChannel</code>的接口，用来关闭指定的<code>channel</code> 。 我们可以先定义自己的注解<code>@RequirePayChannel</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CHANNEL_UNIONPAY</span> <span class="operator">=</span> <span class="number">0x11000</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CHANNEL_ALIPAY</span> <span class="operator">=</span> <span class="number">0x12000</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CHANNEL_WECHAT</span> <span class="operator">=</span> <span class="number">0x13000</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="meta">@IntDef(&#123;CHANNEL_UNIONPAY,CHANNEL_ALIPAY,CHANNEL_WECHAT&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RequirePayChannel &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，你便可以通过<code>@RequirePayChannel</code>来指定disableChannel()的可接受参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">enableChannel</span><span class="params">(<span class="meta">@RequirePayChannel</span> <span class="type">int</span> channel)</span> &#123;</span><br><span class="line">	<span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，一些IDE还会自动提供给你建议参数。如果填入指点范围之外的参数，将会出现错误提示并无法编译通过。<br><img src="/images/int_def_error_tip.png" alt="错误提示2"><br>值得一说的是， 在这里，我们使用到了<code>@Retention(RetentionPolicy.SOURCE)</code>。 它指定了编译器在处理Animation时候的处理方法。 默认编译器会将常量替换成对应的数值，如果没指定该注解，你编译完成后将得到这样的class文件:</p>
+<p><img src="/images/int_def_anination_class.png" alt="反编译RequirePayChannel"></p>
+<p>这样会导致IDE不能提示到有意义的信息。并且一定要指定为特定的int数值，否则也无法编译通过。<br><img src="/images/int_def_error_tip2.png" alt="错误提示3"><br>所以，应该指定<code>Retention</code>让编译器不对该注解做额外的优化处理。</p>
+<h3 id="DrawableRes-StringRes-与-DimenRes"><a href="#DrawableRes-StringRes-与-DimenRes" class="headerlink" title="DrawableRes, StringRes 与 DimenRes"></a>DrawableRes, StringRes 与 DimenRes</h3><p>当我们在编写指定资源文件的接口时，可以通过资源注解来指定该方法接受的资源类型。 指定错误的资源将不能编译通过。 下面代码中，我们使用<code>@DrawableRes</code>来表明<code>setLogo</code>方法只支持Drawable资源的ID。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setLogo</span><span class="params">(<span class="meta">@DrawableRes</span> <span class="type">int</span> resurceId)</span> &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>当我们提供错误的资源，IDE将会报错。<br><img src="/images/drawable_res_error_tip.png" alt="错误提示4">  </p>
+<p><code>@StringRes</code> 与 <code>@DimenRes</code> 的使用方法也类似。</p>
+<h3 id="NonNull-与-Nullable"><a href="#NonNull-与-Nullable" class="headerlink" title="NonNull 与 Nullable"></a>NonNull 与 Nullable</h3><p>将一个空值传入一个方法中可能引发潜在的Crash。 我们应该极力避免这种情况， @NonNull 可以指定参数是否接受空值，当我们传入一个空值的时候，IDE会给出响应的警告。 我们可以这样使用它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setContext</span><span class="params">(<span class="meta">@NonNull</span> Context context)</span> &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们对其传入一个空值的时候，将会显示警告（但代码仍然能通过编译）<br><img src="/images/non_null_waring_tip.png" alt="错误提示5">  </p>
+<p><code>@Nullable</code> 用于修饰参数或者方法的返回值可能为空，提醒开发者主要空值检查。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@Nullable</span><br><span class="line">public Context getContext() &#123;return null;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/nullable_waring_tip.png" alt="错误提示6">  </p>
+</div><div class="tags"><a href="/tags/Android"><i class="fa fa-tag">Android</i></a></div><div class="post-nav"><a class="pre" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a><a class="next" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2015/07/07/android-annotations-start/',
+    url: 'https://xiezefan.me/2015/07/07/android-annotations-start/',
+    title: 'Android 封装SDK时常用的注解',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

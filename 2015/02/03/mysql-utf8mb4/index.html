@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>MySQL解决插入emoji表情失败的问题 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">MySQL解决插入emoji表情失败的问题</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">MySQL解决插入emoji表情失败的问题</h1><div class="post-meta">2015-02-03<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2015/02/03/mysql-utf8mb4/" href="/2015/02/03/mysql-utf8mb4/#disqus_thread"></a><div class="post-content"><p>一直以为UTF-8是万能的字符集问题解决方案. 直到遇到这个问题.<br>最近在做新浪微博的爬虫, 在存库的时候, 发现只要保持emoji表情, 就回抛出以下异常</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Incorrect string value: &#x27;\xF0\x90\x8D\x83\xF0\x90...&#x27; </span><br></pre></td></tr></table></figure>
+<p>众所周知UTF-8是3个字节,  其中已经包括我们日常能见过的绝大多数字体. 但3个字节远远不够容纳所有的文字, 所以便有了utf8mb4, utf8mb4是utf8的超集, 占4个字节, 向下兼容utf8. 我们日常用的emoji表情就是4个字节了.<br>所以在此我们像utf8的数据表插入数据就会报出<code>Incorrect string value</code>这个错误.</p>
+<span id="more"></span>
+
+<p>Google一下很容易就找到了解决方案, 具体解决办法是:</p>
+<ul>
+<li><p>1.修改数据表的字符集为utf8mb4</p>
+<blockquote>
+<p>这点很简单, 修改语句网上找一大堆, 不过建议重新建表, 使用 <code>mysqldump -uusername -ppassword database_name table_name &gt; table.sql</code> 备份相应数据表, 并修改其中的建表语句的字符集为 utf8mb4 即可, 然后 <code>mysql -uusername -ppassword database_name &lt; table.sql</code> 重新导入sql即可完成修改字符集操作.</p>
+</blockquote>
+</li>
+<li><p>2.MySQL数据库版本要5.5.3及以上</p>
+<blockquote>
+<p>网络上所有的文章都说明要MySQL 5.5.3以上的版本才支持utf8mb4, 不过我使用的数据库版本为5.5.18, 最终仍能解决问题, 所以同学们不要急着找运维哥哥升级数据库先, 先试试能不能自己解决问题.</p>
+</blockquote>
+</li>
+<li><p>3.修改数据库配置文件<code>/etc/my.cnf</code>并重启mysql服务</p>
+<blockquote>
+<p>主要是修改数据库的默认字符集, 以及连接, 查询的字符集, [Mysql支持emoji 表情符号 升级编码为UTF8MB4][1]  这篇文章有详细的设置方法,  [深入Mysql字符集设置][2] 这篇文章有其中设置的各个字符集的作用, 大家可以科普下.</p>
+</blockquote>
+</li>
+<li><p>4.升级MySQL Connector到5.1.21及以上</p>
+</li>
+</ul>
+<p>以上所有的操作, 最关键的是步骤3, 修改数据库的配置文件, 其中大概修改了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line"># 客户端来源数据的默认字符集</span><br><span class="line">default-character-set = utf8mb4</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line"># 服务端默认字符集</span><br><span class="line">character-set-server=utf8mb4</span><br><span class="line"># 连接层默认字符集</span><br><span class="line">collation-server=utf8mb4_unicode_ci</span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line"># 数据库默认字符集</span><br><span class="line">default-character-set = utf8mb4</span><br></pre></td></tr></table></figure>
+<p>这些配置指定了数据从客户端到服务端所经过的一条条管道使用的字符集, 其中每一个管道出现问题都可能会导致插入失败或者乱码.</p>
+<p>但很多时候, 线上的数据库是不能随便修改数据库文件的, 所以我们的运维同学很果断的回绝了我修改数据库配置文件的请求(T_T)  </p>
+<p>所以就只能用代码解决了, 一开始是准备从JDBC连接时候就指定使用的字符集处下手.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdbc:mysql://localhost:3306/ding?characterEncoding=UTF-8</span><br></pre></td></tr></table></figure>
+<p>主要把UTF-8修改为utf8mb4对于的Java Style Charset字符串应该就能解决问题吧?<br>不过很遗憾的是, Java JDBC并不存在utf8mb4对于的字符集. 使用UTF-8的时候可以兼容urf8mb4并自动转换字符集.</p>
+<blockquote>
+<p>For example, to use 4-byte UTF-8 character sets with Connector&#x2F;J, configure the MySQL server with character_set_server&#x3D;utf8mb4, and leave characterEncoding out of the Connector&#x2F;J connection string. Connector&#x2F;J will then autodetect the UTF-8 setting.  – [MySQL:Using Character Sets and Unicode][3]</p>
+</blockquote>
+<p>后来科普了一下, 在每一次查询请求的时候, 可以显式的指定使用的字符集, 使用 <code>set names utf8mb4</code> 可以指定本次链接的字符集为utf8mb4, 但这个设置在每次连接被释放后都会失效.<br>目前的解决办法是, 在需要插入utf8mb4的时候, 显示地调用执行<code>set names utf8mb4</code>, 如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jdbcTemplate.execute(&quot;set names utf8mb4&quot;);</span><br><span class="line">jdbcTempalte.execute(&quot;...&quot;);</span><br></pre></td></tr></table></figure>
+<p>需要注意的是, 我们在使用一下ORM框架的时候, 因为性能优化原因, 框架会延迟提交, 除非事务结束或者用户主动调用强制提交, 负责执行的<code>set names utf8mb4</code>仍然不会生效. </p>
+<p>在这里我使用的是myBatis, 以MessageDao为例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// MessageDao</span><br><span class="line">public interface MessageDao &#123;</span><br><span class="line">    @Update(&quot;set names utf8mb4&quot;)</span><br><span class="line">    public void setCharsetToUtf8mb4();</span><br><span class="line">    @Insert(&quot;insert into tb_message ......&quot;)</span><br><span class="line">    public void insert(Message msg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// test code</span><br><span class="line"></span><br><span class="line">SqlSession sqlSession = sqlSessioFactory.openSession();</span><br><span class="line">messageDao = sqlSession.getMapper(MessageDao.class);</span><br><span class="line">messageDao.setCharsetToUtf8mb4();</span><br><span class="line">// 强制提交</span><br><span class="line">sqlSession.commit();</span><br><span class="line">messageDao.insert(message);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>至此, 问题便解决了..<br>哎, 如果世事能那么顺利就好了, 在项目中, mybatis是实例是交由Spring去管理的, 也就是说我拿不到sqlSession, 也就是强制提交不了. 并且因为Spring事务框架的限制, 他并不允许用户显式调用强制提交.  目前还在纠结这个问题.<br>有两个解决思路:</p>
+<ol>
+<li>使用AOP, 在可能插入4字节UTF8字符的时候, 前置方法执行<code>set names utf8mb4</code>, 但该方案还不能确定AOP的方法会被Spring进行事务管理么, 并且在前置方法中,拿到的链接是否和接下来拿到的连接对象是同一个session.</li>
+<li>研究Spring JDBC的创建方法, 写一个hook在每次创建新的数据库连接的时候, 都执行一次<code>set names utf8mb4</code>, 这样就保证每一次拿到的链接都是设置过字符集的.</li>
+</ol>
+<p>待有时间再实验一下以上两种方案.</p>
+</div><div class="tags"><a href="/tags/Mysql"><i class="fa fa-tag">Mysql</i></a></div><div class="post-nav"><a class="pre" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a><a class="next" href="/2015/01/06/spring-test-start/">使用Spring Test编写单元测试</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2015/02/03/mysql-utf8mb4/',
+    url: 'https://xiezefan.me/2015/02/03/mysql-utf8mb4/',
+    title: 'MySQL解决插入emoji表情失败的问题',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

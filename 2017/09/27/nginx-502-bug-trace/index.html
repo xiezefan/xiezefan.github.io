@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>记一次生产环境Nginx间歇性502的事故分析过程 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">记一次生产环境Nginx间歇性502的事故分析过程</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">记一次生产环境Nginx间歇性502的事故分析过程</h1><div class="post-meta">2017-09-27<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2017/09/27/nginx-502-bug-trace/" href="/2017/09/27/nginx-502-bug-trace/#disqus_thread"></a><div class="post-content"><p>最近我们我们在将部分业务从自有机房迁移到国内某云服务器上，在小规模上量后，发现Nginx间接性出现大量502。异常出现的特点是，一瞬间后端多个独立部署的服务全部出现502。</p>
+<p>我们的服务架构如下:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+--------+  HTTP   +-------+  HTTP   +-------+</span><br><span class="line">| Client | ------&gt; |       | ------&gt; | API A |</span><br><span class="line">+--------+         |       |         +-------+</span><br><span class="line">                   |       |  HTTP   +-------+</span><br><span class="line">                   | Nginx | ------&gt; | API B |</span><br><span class="line">                   |       |         +-------+</span><br><span class="line">                   |       |  HTTP   +-------+</span><br><span class="line">                   |       | ------&gt; | API C |</span><br><span class="line">                   +-------+         +-------+</span><br></pre></td></tr></table></figure>
+
+<p>一般讲，Nginx 502就是后端处理不过来，但查看监控后端几个API的负载均很低，当前请求的QPS远远低于服务的上限。而且同一瞬间，多套独立部署的API均处理不过来的概率也比较低。</p>
+<span id="more"></span>
+
+<p>我们简单做了个对比测试，分别对域名（请求走Nginx）与直接通过IP对内网一个API通过wrk进行小规模压测。<br><img src="/images/%E5%8E%8B%E6%B5%8B%E6%88%AA%E5%9B%BE.png" alt="压测截图"><br>对比测试发现，直接通过域名走Nginx对API进行压测的话，QPS远远小于预期，并且存在大量失败请求。基本断定问题出在Nginx —&gt; API 这条链路上。同时排除了后端服务响应不过来的可能性。网络问题可能性大一点。</p>
+<p>一开始我们怀疑云服务商对内网带宽做了限制，我们观察内网带宽达到在200MB&#x2F;S后就上不去了，所以我们在Nginx机器上ping后端服务，观察一段时间发现有小量抖动，但基本延迟正常。那云服务商对网络做限制的可能性就变小了很多。</p>
+<p>我们观察Nginx错误日志:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2017/09/26 14:23:00 [error] 4950#4950: *4162133210 no live upstreams while connecting to upstream, client: xxx.xxx.xxx.xxx, server: api.xx.xxxxxxx.cn, request: &quot;POST /xx/xxxxxx/bidder HTTP/1.1&quot;, upstream: &quot;http://xxxxxxxxxx/bidder&quot;, host: &quot;api.xx.xxxxxxx.cn&quot;</span><br></pre></td></tr></table></figure>
+<p>这里出现<code>no live upstreams while connecting to upstream</code>, 也就说一瞬间Nginx检测不到任何存活的后端服务，而网络又没有大波动，那就可能是TCP链接出问题。打开Zabbix监控发现TCP连接数的确发生剧烈的波动现象。<br><img src="/images/%E5%BC%82%E5%B8%B8TCP%E8%BF%9E%E6%8E%A5%E6%95%B0%E8%B6%8B%E5%8A%BF.png" alt="异常TCP连接数趋势"></p>
+<p>这时候问题很明显，Nginx-&gt;API这一链路存在大量的TCP链接被回收的情况，我们马上在API机器上查看链接状态</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shell &gt; netstat -n | awk &#x27;/^tcp/ &#123;++state[$NF]&#125; END &#123;for(key in state) print key,&quot;\t&quot;,state[key]&#125;&#x27;</span><br><span class="line">SYN_RECV 	 1</span><br><span class="line">ESTABLISHED 	 656</span><br><span class="line">FIN_WAIT1 	 4</span><br><span class="line">TIME_WAIT 	 153429</span><br></pre></td></tr></table></figure>
+
+<p>TIME_WAIT特别的多，大量的连接被API侧主动关闭了。这说明Nginx-&gt;API这一步请求并没有Keep-Alive，我们检查Nginx，确定是配置了Keep-Alive</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">upstream xxxxxxx &#123;</span><br><span class="line">    server 172.17.192.98:8087 max_fails=3 fail_timeout=5s weight=1;</span><br><span class="line">    server 172.17.192.99:8087 max_fails=3 fail_timeout=5s weight=1;</span><br><span class="line">    keepalive 256;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为业务的特殊性，我们很确定Client一定为携带Keep-Alive的。那么说明后端API没正确的支持Keep-Alive，我们开始对API代码逻辑进行Review，但我们检查配置，发现服务默认是开启Keep-Alive的，我们进行显式的配置，仍然不起作用。这里存在一个可能性就是我们时候的Web框架有BUG。所以我们接下来做了一个测试，来验证服务是否开启了Keep-Alive。<br><img src="/images/Keep-Alive%E6%B5%8B%E8%AF%95.png" alt="Keep-Alive测试"><br>我们使用curl连发两次请求，在第二次请求的报文中，我们可以看到<code>Re-using existing connection</code>。这说明连接被复用，后端API服务对Keep-Alive的支持是正常的。</p>
+<p>这时候就陷入了困境了，求助Google大神后，发现Nginx支持Keep-Alive还需要在配置转发的时候的时候增加以下配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">location ^~ /xxxxx/ &#123;</span><br><span class="line">    ...</span><br><span class="line">    proxy_set_header Connection &quot;Keep-Alive&quot;;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>贴上配置后，惊奇的发现问题解决了，后端服务器TIME_WAIT的链接下降到2位数，并且也不再出现502现象。棒！</p>
+<h3 id="后续发展"><a href="#后续发展" class="headerlink" title="后续发展"></a>后续发展</h3><p>在HTTP 1.0中，Keep-Alive默认是关闭的，需要在请求头显式加上<code>Connection: Keep-Alive</code>，才能启用Keep-Alive。但在HTTP 1.1中，该功能默认是开启的，需要使用<code>Connection: Close</code>才会禁用Keep-Alive。目前大部分浏览器都是使用HTTP 1.1协议。</p>
+<p>我们后来分析所有的Client请求，发现全部都是1.1协议，这就很诡异了。接下来我们在Nginx-&gt;API这条链路上捉包，惊奇的发现，竟然出现部分流量是1.0协议的，部分是1.1协议的。这里就解释了为什么会出现连接无法复用的问题。所以我们统一将所有的转发配置都增加了以下规制强制指定使用1.1协议。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location ^~ /xxxxxx/ &#123;</span><br><span class="line">    ...</span><br><span class="line">    proxy_http_version 1.1;</span><br><span class="line">    proxy_set_header Connection &quot;&quot;;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但整个事故中，仍然存在几个疑点:</p>
+<ol>
+<li>为什么Nginx转发的流量中，会混入1.0协议的请求呢？</li>
+<li>是什么原因导致Nginx或Nginx所在服务器的操作系统在对TCP链接大量回收，并且把正常连接也回收掉导致后端Server “no live upstreams”了呢？</li>
+</ol>
+<p>目前暂无头绪，后续分析有结果再补上。</p>
+</div><div class="tags"><a href="/tags/Nginx"><i class="fa fa-tag">Nginx</i></a><a href="/tags/Keepalive"><i class="fa fa-tag">Keepalive</i></a></div><div class="post-nav"><a class="pre" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a><a class="next" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2017/09/27/nginx-502-bug-trace/',
+    url: 'https://xiezefan.me/2017/09/27/nginx-502-bug-trace/',
+    title: '记一次生产环境Nginx间歇性502的事故分析过程',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

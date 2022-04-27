@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>MQTT 基础知识 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">MQTT 基础知识</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">MQTT 基础知识</h1><div class="post-meta">2014-12-29<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2014/12/29/mqtt-start/" href="/2014/12/29/mqtt-start/#disqus_thread"></a><div class="post-content"><p>MQTT是IBM开发的一个即时通讯协议， 广泛运用在移动互联网实时推送以及相关扩展应用上，本文只要简述MQTT协议的部分知识点。</p>
+<span id="more"></span>
+
+<h3 id="基础内容"><a href="#基础内容" class="headerlink" title="基础内容"></a>基础内容</h3><p>MQTT的固定头部包含以下信息</p>
+<h4 id="MessageType"><a href="#MessageType" class="headerlink" title="MessageType"></a>MessageType</h4><p>消息类型，使用4位二进制标示，共16种消息类型，其中0和15位做保留待用，实际使用共14种消息事件类型</p>
+<h4 id="DUP-flag"><a href="#DUP-flag" class="headerlink" title="DUP flag"></a>DUP flag</h4><p>默认为0，标示该消息为第一次发送，当该值为一时，标示消息先前已经被传输过了，该位前置条件为Qos &gt; 0，标示消息需要回复确认</p>
+<h4 id="QoS-level"><a href="#QoS-level" class="headerlink" title="QoS level"></a>QoS level</h4><p>服务质量，由两个二进制位标示<br>*　0：至多一次<br>*　1：至少一次<br>*　2：只有一次<br>*　3：保留</p>
+<h4 id="RETAIN"><a href="#RETAIN" class="headerlink" title="RETAIN"></a>RETAIN</h4><p>是否对PUBLISH消息进行持久化</p>
+<ul>
+<li>1：标示需要持久化， 当新订阅者出现时，会收到最新一个持久化消息</li>
+<li>2：标示不需要持久化，推送仅对当前订阅者</li>
+</ul>
+<p><strong>当RETAIN&#x3D;1，Payload&#x3D;NULL时标示删除该Topic的持久化PUBLISH消息</strong></p>
+<h3 id="Topic通配符"><a href="#Topic通配符" class="headerlink" title="Topic通配符"></a>Topic通配符</h3><blockquote>
+<p>&#x2F;：用来表示层次，比如a&#x2F;b，a&#x2F;b&#x2F;c。<br>#：表示匹配&gt;&#x3D;0个层次，比如a&#x2F;#就匹配a&#x2F;，a&#x2F;b，a&#x2F;b&#x2F;c。<br>单独的一个#表示匹配所有。<br>不允许 a#和a&#x2F;#&#x2F;c。<br>+：表示匹配一个层次，例如a&#x2F;+匹配a&#x2F;b，a&#x2F;c，不匹配a&#x2F;b&#x2F;c。<br>单独的一个+是允许的，a+不允许，a&#x2F;+&#x2F;b不允许</p>
+</blockquote>
+<h3 id="心跳-PINGREQ-x2F-PINGRES"><a href="#心跳-PINGREQ-x2F-PINGRES" class="headerlink" title="心跳 PINGREQ&#x2F;PINGRES"></a>心跳 PINGREQ&#x2F;PINGRES</h3><p>Client告知Server其心跳间隔KeepAliveTime，Client需要在该时长内发送PINGREQ，Server收到后返回PINGRES确认以保持Client与Server的长链接。<br>Server在1.5个时长内未收到PINGREQ，就断开连接<br>Client在1个时长内未收到Server的PINGRES，就断开连接<br>时间最长为18hours，0标示不断开</p>
+<h3 id="Clean-Session"><a href="#Clean-Session" class="headerlink" title="Clean Session"></a>Clean Session</h3><p>服务端是否保存Client的订阅信息</p>
+<ul>
+<li>true:保存</li>
+<li>false:不保持</li>
+</ul>
+<h3 id="字段建议长度"><a href="#字段建议长度" class="headerlink" title="字段建议长度"></a>字段建议长度</h3><ul>
+<li>clientId 客户端-&gt;服务端, 服务端-&gt;客户端的单向唯一标示,length&lt;&#x3D;23</li>
+<li>username 用户名,用于身份验证, length&lt;&#x3D;12</li>
+<li>password 用户密码,用户身份验证, length&lt;&#x3D;12</li>
+</ul>
+<h3 id="遗嘱消息-WillMessage"><a href="#遗嘱消息-WillMessage" class="headerlink" title="遗嘱消息 WillMessage"></a>遗嘱消息 WillMessage</h3><p>遗嘱消息标示客户端网络异常导致连接中断后, 服务器将发布该遗嘱消息<br>遗嘱消息包含以下信息:</p>
+<ul>
+<li>Will Flag:是否定义遗嘱消息，Will Flag&#x3D;1是标示指定遗嘱消息，否则将直接忽略Will Qos，Will RETAIN的值</li>
+<li>Will Qos:遗嘱消息的通讯质量</li>
+<li>Will RETAIN:遗嘱消息是否持久化</li>
+<li>Will Topic:遗嘱消息主题</li>
+<li>Will Message:遗嘱消息Payload</li>
+</ul>
+<h3 id="建立连接CONNECT的响应机制"><a href="#建立连接CONNECT的响应机制" class="headerlink" title="建立连接CONNECT的响应机制"></a>建立连接CONNECT的响应机制</h3><ul>
+<li>客户端绕过CONNECT消息直接发送其它类型消息，服务器应关闭此非法连接</li>
+<li>客户端发送CONNECT之后未收到CONNACT，需要关闭当前连接，然后重新连接</li>
+<li>相同Client ID客户端已连接到服务器，先前客户端必须断开连接后，服务器才能完成新的客户端CONNECT连接</li>
+<li>客户端发送无效非法CONNECT消息，服务器需要关闭</li>
+</ul>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/caca/p/mqtt.html">MQTT协议简记</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.blogjava.net/yongboy/archive/2014/02/07/409587.html">MQTT协议笔记之头部信息</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.blogjava.net/yongboy/archive/2014/02/09/409630.html">MQTT协议笔记之连接和心跳</a></p>
+</li>
+</ul>
+</div><div class="tags"><a href="/tags/MQTT"><i class="fa fa-tag">MQTT</i></a><a href="/tags/IM"><i class="fa fa-tag">IM</i></a></div><div class="post-nav"><a class="pre" href="/2014/12/29/agenda-start/">Agenda笔记</a><a class="next" href="/2014/10/05/tip-git/">Git常用命令集</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2014/12/29/mqtt-start/',
+    url: 'https://xiezefan.me/2014/12/29/mqtt-start/',
+    title: 'MQTT 基础知识',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

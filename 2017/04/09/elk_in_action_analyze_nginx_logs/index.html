@@ -1,0 +1,103 @@
+<!DOCTYPE html><html lang="cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>ELK实战 - 利用Nginx日志分析API耗时 | Zefan Xie's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 6.1.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">ELK实战 - 利用Nginx日志分析API耗时</h1><a id="logo" href="/.">Zefan Xie's Blog</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">ELK实战 - 利用Nginx日志分析API耗时</h1><div class="post-meta">2017-04-09<span> | </span><span class="category"><a href="/categories/technical/">Technical</a></span></div><a class="disqus-comment-count" data-disqus-identifier="2017/04/09/elk_in_action_analyze_nginx_logs/" href="/2017/04/09/elk_in_action_analyze_nginx_logs/#disqus_thread"></a><div class="post-content"><p>本篇主要介绍如何利用ELK分析Nginx日志，统计出API的耗时数据</p>
+<p>ELK是ElasticSearch，Logstash，Kibana的简称，但我觉得这个名字已经过时了，现在叫ELKB更合适，因为Elastic家族近期迎来了一位新成员Beats，专职做数据采集工作。</p>
+<p>我们先来介绍下ELK的整体架构吧。</p>
+<span id="more"></span>
+
+<p>早些时候，ELK的流水线是这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Raw Logs(原始日志数据) -&gt; Logstash(数据采集与解析) -&gt; ElasticSearch(数据存储) -&gt; Kibana(数据展示)</span><br></pre></td></tr></table></figure>
+
+<p>但是该模式有一个小缺陷是Logstash，主要因为Logstash是使用Java编写的，本身启动需要JVM资源，并且在宿主机上进行日志采集并分析必然会消耗资源。</p>
+<p>后来，Elastic使用Go写了一个专门用于数据采集的工具集<a target="_blank" rel="noopener" href="https://www.elastic.co/products/beats">Beats</a>，其包括:</p>
+<p>现在，ELKB的流水线编程这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Raw Logs(原始日志数据) -&gt; Beats(数据采集) -&gt; Logstash(数据解析) -&gt; ElasticSearch(数据存储) -&gt; Kibana(数据展示)</span><br></pre></td></tr></table></figure>
+
+<p>在此之前，我们先搭建好ElasticSearch与Kibana，ELK家族的有一个优良传统，就是开箱即用。网上也有很多文章详细的讲述了ELK的安装细节，所以，本文就不在安装细节方面赘述，具体的安装细节，可以参考官方文档: </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html">ElasticSearch 安装</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/current/targz.html">Kibana 安装</a></li>
+</ul>
+<h3 id="Configure-Filebeat"><a href="#Configure-Filebeat" class="headerlink" title="Configure Filebeat"></a>Configure Filebeat</h3><p>我们直接进入正题，如何使用ELK来分析Nginx日志，并绘制API响应耗时的图表。</p>
+<p>首先我们看一下Nginx的日志打印设置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; $status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">                      &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot; &quot;$request_time&quot; &quot;$host&quot; &#x27;</span><br><span class="line">                      &#x27;&quot;$upstream_status&quot; &quot;$upstream_addr&quot; &quot;$upstream_response_time&quot;&#x27; ;</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，我们将不同业务的Nginx访问日志写入到不同的文件里面，在我的系统里，Nginx日志被保存在<code>/usr/local/nginx/logs/api_acess.log</code>中。</p>
+<p>我们在这里，使用Beats工具中的FileBeats来收集日志Nginx日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">filebeat:</span><br><span class="line">  prospectors:</span><br><span class="line">    -</span><br><span class="line">      paths:</span><br><span class="line">        - /usr/local/nginx/logs/api_acess.log</span><br><span class="line">      input_type: log</span><br><span class="line"></span><br><span class="line">output:</span><br><span class="line"></span><br><span class="line">  logstash:</span><br><span class="line">    hosts: [&quot;192.168.248.216:5045&quot;, &quot;192.168.248.217:5045&quot;]</span><br><span class="line">    loadbalance: true</span><br><span class="line">    index: &lt;your service index&gt;</span><br><span class="line"></span><br><span class="line">logging:</span><br><span class="line">  files:</span><br><span class="line">    rotateeverybytes: 10485760 # = 10MB</span><br></pre></td></tr></table></figure>
+
+<p>以上配置文件主要是读取<code>/usr/local/nginx/logs/api_acess.log</code>的日志，并写入对应LogStash提供的TCP接口中。具体Filebeat的详细使用文档，可以参考（&#x2F;&#x2F;TODO 文档链接）</p>
+<h3 id="Configure-Logstash"><a href="#Configure-Logstash" class="headerlink" title="Configure Logstash"></a>Configure Logstash</h3><p>接下来，我们需要启动对应的LogStash服务，它主要提供以下两个功能：</p>
+<ol>
+<li>提供5044接口给Filebeat做文件写入</li>
+<li>解析Nginx日志，提取需要的数据结构并写入ElasticSearch</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">  beats &#123;</span><br><span class="line">    port =&gt; 5044</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">filter &#123;</span><br><span class="line">  grok &#123;</span><br><span class="line">    patterns_dir =&gt; [&quot;/opt/push/logstash/patterns&quot;]</span><br><span class="line">    match =&gt; &#123; &#x27;message&#x27; =&gt; &#x27;%&#123;IPORHOST:clientip&#125; - %&#123;APPKEY:appkey&#125; \[%&#123;HTTPDATE:timestamp&#125;\] &quot;%&#123;HTTPMETHOD:method&#125; %&#123;URIPATHPARAM:request&#125; HTTP/%&#123;NUMBER:httpversion&#125;&quot; %&#123;NUMBER:http_status&#125; %&#123;NUMBER:response_size&#125; %&#123;QS:http_referer&#125; %&#123;QS:user_agent&#125; %&#123;QS:x_forwarded_for&#125; &quot;%&#123;BASE10NUM:request_time&#125;&quot; &quot;%&#123;HOST:request_host&#125;&quot;  %&#123;BASE10NUM:upstream_header_time&#125; %&#123;NUMBER:upstream_response_time:float&#125; %&#123;HOST:upstream_addr&#125;:%&#123;NUMBER:upstream_port&#125;&#x27; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">output &#123;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">        hosts =&gt; [&quot;172.16.99.xxx:1xxxx&quot;]</span><br><span class="line">        manage_template =&gt; false</span><br><span class="line">        index =&gt; &quot;%&#123;[@metadata][beat]&#125;-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">        document_type =&gt; &quot;%&#123;[@metadata][type]&#125;&quot;</span><br><span class="line">        flush_size =&gt; 20000</span><br><span class="line">        idle_flush_time =&gt; 10</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们利用到了gork表达式。 他是Elastic公司设计专门用来解析日志的工具，具体<a href="http://xiezefan.me/2017/04/09/elk_in_action_grok_start/">Gork简易入门</a>。</p>
+<p>简单说，gork表达式可以方便的组合正则表达式，提取出日志的相关数据，最终转变成JSON格式输出。以下是我专门为以上Nginx日志结构写的Gork表达式，我们可以使用Gork Debuger工具来帮我们校验Gork表达式的正确性。</p>
+<p>Gork表达式需要一定的学习成本，但有了它，我们可以更方便快捷地分析日志。</p>
+<p>接下来，依次启动LagStash与FileBeat。 我们先认为的制造一点日志输出，可以看到在ElasicSearch中已经出现了响应的索引。</p>
+<h3 id="Configure-Kibana"><a href="#Configure-Kibana" class="headerlink" title="Configure Kibana"></a>Configure Kibana</h3><p>我们在Kibana中建立该索引，可以看到，日志的关键数据已经成功被提取并存入到ElasticSearch。接下来，我们将利用Kibana来统计报表。</p>
+<p><img src="http://pics.xiezefan.me/blog/elk_in_action_kibana_chart"></p>
+<p>在Kibana绘制图标本身什么技术难度，关键一点是在将数据写入ElasticSearch中的时候，需要将一些关键指标转换成数值类型，我们可以在Grok转换的时候，指定生成Number类型，或者之间预定义相关业务的ElasticSearch Mapping Template。</p>
+<p>有一些绘图小技巧接下来准备独立整理一篇文章做单独分享。</p>
+</div><div class="tags"><a href="/tags/ELK"><i class="fa fa-tag">ELK</i></a><a href="/tags/Gork"><i class="fa fa-tag">Gork</i></a></div><div class="post-nav"><a class="pre" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a><a class="next" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></div><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqusjs.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/gh/sukkaw/disqusjs/dist/disqus.js"></script><script type="text/javascript" id="disqus-count-script">$(function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json', true);
+  xhr.timeout = 2500;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      $('.post-meta .post-comments-count').show();
+      var s = document.createElement('script');
+      s.id = 'dsq-count-scr';
+      s.src = 'https://zefan-xies-blog.disqus.com/count.js';
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    }
+  };
+  xhr.ontimeout = function () { xhr.abort(); };
+  xhr.send(null);
+});</script><div class="comments" id="disqus_thread"><script type="text/javascript">// Load comments with DisqusJS
+function loadComments() {
+  window.dsqjs = new DisqusJS({
+    shortname: 'zefan-xies-blog',
+    siteName: 'Zefan Xie\'s Blog',
+    identifier: '2017/04/09/elk_in_action_analyze_nginx_logs/',
+    url: 'https://xiezefan.me/2017/04/09/elk_in_action_analyze_nginx_logs/',
+    title: 'ELK实战 - 利用Nginx日志分析API耗时',
+    api: 'https://disqus.skk.moe/disqus/',
+    apikey: 'spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9',
+    admin: 'zefanxie',
+    adminLabel: 'Mod'
+  });
+}
+// Lazy load {# Credit: https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/comments/disqus.swig #}
+(function () {
+  var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+  if (offsetTop <= 0) {
+    // Load directly when there's no scrollbar
+    window.addEventListener('load', loadComments, false);
+  } else {
+    var disqusScroll = function () {
+      // offsetTop may changes because of manually resizing browser window or lazy loading images
+      var offsetTop = document.getElementById('disqus_thread').offsetTop - window.innerHeight;
+      var scrollTop = window.scrollY;
+
+      // Pre-load comments a bit? (margin or anything else)
+      if (offsetTop - scrollTop < 60) {
+        window.removeEventListener('scroll', disqusScroll);
+        loadComments();
+      }
+    };
+    window.addEventListener('scroll', disqusScroll);
+  }
+})();
+// Scroll to comments automatically if #comment-xxx anchor specified
+window.addEventListener('load', function () {
+  // I don't know why, it just works.
+  window.setTimeout(function () {
+    if (location.hash.indexOf('#comment-') !== -1) {
+      document.getElementById('disqus_thread').scrollIntoView(true);
+    }
+  }, 100);
+}, false);
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://xiezefan.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/technical/">Technical</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/java/" style="font-size: 15px;">Java</a> <a href="/tags/agenda/" style="font-size: 15px;">Agenda</a> <a href="/tags/android/" style="font-size: 15px;">Android</a> <a href="/tags/druid/" style="font-size: 15px;">Druid</a> <a href="/tags/elk/" style="font-size: 15px;">ELK</a> <a href="/tags/gork/" style="font-size: 15px;">Gork</a> <a href="/tags/linux/" style="font-size: 15px;">Linux</a> <a href="/tags/maven/" style="font-size: 15px;">Maven</a> <a href="/tags/jdk/" style="font-size: 15px;">JDK</a> <a href="/tags/nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/keepalive/" style="font-size: 15px;">Keepalive</a> <a href="/tags/git/" style="font-size: 15px;">Git</a> <a href="/tags/mqtt/" style="font-size: 15px;">MQTT</a> <a href="/tags/im/" style="font-size: 15px;">IM</a> <a href="/tags/redis/" style="font-size: 15px;">Redis</a> <a href="/tags/mysql/" style="font-size: 15px;">Mysql</a> <a href="/tags/ziplist/" style="font-size: 15px;">Ziplist</a> <a href="/tags/sublime-text/" style="font-size: 15px;">Sublime-text</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/04/06/druid_data_ingestion_different/">Druid 几种数据摄入方式的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/27/nginx-502-bug-trace/">记一次生产环境Nginx间歇性502的事故分析过程</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/redis_in_action_ziplist/">Redis内存压缩实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_analyze_nginx_logs/">ELK实战 - 利用Nginx日志分析API耗时</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/09/elk_in_action_grok_start/">ELK实战 - Grok简易入门</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/13/maven_module_with_git_sub_module/">使用Git SubModule对Maven Module进行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/13/redis_cluster_research_2/">Redis Cluster 初探(2) - 运行规制</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/03/redis_cluster_research_1/">Redis Cluster 初探(1) - 集群搭建与扩容</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/07/android-annotations-start/">Android 封装SDK时常用的注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/03/mysql-utf8mb4/">MySQL解决插入emoji表情失败的问题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> Letzte Kommentare</i></div><script type="text/javascript" src="//zefan-xies-blog.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Zefan Xie's Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>

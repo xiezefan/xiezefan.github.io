@@ -6,7 +6,7 @@
   <link href="https://xiezefan.me/atom.xml" rel="self"/>
   
   <link href="https://xiezefan.me/"/>
-  <updated>2022-04-27T07:19:35.665Z</updated>
+  <updated>2022-06-19T07:52:38.454Z</updated>
   <id>https://xiezefan.me/</id>
   
   <author>
@@ -15,6 +15,56 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>夜读 #1 -《不拘一格: 网飞的自由与责任工作法》</title>
+    <link href="https://xiezefan.me/2022/06/19/netflix-no-rules-rules/"/>
+    <id>https://xiezefan.me/2022/06/19/netflix-no-rules-rules/</id>
+    <published>2022-06-18T16:00:00.000Z</published>
+    <updated>2022-06-19T07:52:38.454Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;《不拘一格: 网飞的自由与责任工作法》 这本书是某次一位同事分享他的近期书单的时候看到的，在国内公司的高速增长，掩盖了很多公司管理上的问题，很多公司为了解决某个管理问题，引入了一个新的制度，结果往往适得让整个工作环境变得更加糟糕。</summary>
+        
+      
+    
+    
+    
+    <category term="Reading" scheme="https://xiezefan.me/categories/reading/"/>
+    
+    
+    <category term="Corporate Culture" scheme="https://xiezefan.me/tags/corporate-culture/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>重启</title>
+    <link href="https://xiezefan.me/2022/04/27/restart/"/>
+    <id>https://xiezefan.me/2022/04/27/restart/</id>
+    <published>2022-04-26T16:00:00.000Z</published>
+    <updated>2022-06-19T07:53:22.727Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;我的上一篇博客，已经是五年前的事情了。&lt;/p&gt;
+&lt;p&gt;这五年变化很大，第一次经历公司上市，买了第一辆车，换了个公司，经历家人生病， 结了个婚，在深圳也安家立业。&lt;/p&gt;
+&lt;p&gt;这几年下来我并没少写东西， 整理很多日常中的规划总结， 读了很多书也写了不少笔记与心得。</summary>
+        
+      
+    
+    
+    
+    <category term="Life" scheme="https://xiezefan.me/categories/life/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Druid 几种数据摄入方式的区别</title>
@@ -390,44 +440,6 @@
     
     
     <summary type="html">实际应用中，我们并不经常需要保证HashMap这些底层代码的同步，交由上层逻辑去控制同步。所以，大多数时候建议使用HashMap</summary>
-    
-    
-    
-    <category term="Technical" scheme="https://xiezefan.me/categories/technical/"/>
-    
-    
-    <category term="Java" scheme="https://xiezefan.me/tags/java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>String，StringBuffer，StringBuilder的区别</title>
-    <link href="https://xiezefan.me/2014/05/19/String-StringBuffer-StringBuilder-diff/"/>
-    <id>https://xiezefan.me/2014/05/19/String-StringBuffer-StringBuilder-diff/</id>
-    <published>2014-05-18T16:00:00.000Z</published>
-    <updated>2022-04-27T07:19:27.856Z</updated>
-    
-    
-    <summary type="html">&lt;h3 id=&quot;String&quot;&gt;&lt;a href=&quot;#String&quot; class=&quot;headerlink&quot; title=&quot;String&quot;&gt;&lt;/a&gt;String&lt;/h3&gt;&lt;p&gt;String值是不可变的，每次对String的操作都会生出一个新的String对象。如果频繁改动的话，效率会很低，产生太多的垃圾会触发JVM的垃圾回收，影响系统性能。&lt;br&gt;另外 &lt;code&gt;String s = new String(&amp;quot;abc&amp;quot;) &lt;/code&gt; 会生出两个对象, 因为括号里面的”abc”算一。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Technical" scheme="https://xiezefan.me/categories/technical/"/>
-    
-    
-    <category term="Java" scheme="https://xiezefan.me/tags/java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>final, finally, finalize的区别</title>
-    <link href="https://xiezefan.me/2014/05/19/final-finally-finalize-diff/"/>
-    <id>https://xiezefan.me/2014/05/19/final-finally-finalize-diff/</id>
-    <published>2014-05-18T16:00:00.000Z</published>
-    <updated>2022-04-27T07:19:34.431Z</updated>
-    
-    
-    <summary type="html">final, finally, finalize的区别</summary>
     
     
     

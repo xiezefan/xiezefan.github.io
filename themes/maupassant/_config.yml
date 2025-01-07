@@ -1,10 +1,10 @@
 disqus:
-  enable: true ## If you want to use Disqus comment system, please set the value to true.
-  shortname: zefan-xies-blog
-  api: https://disqus.skk.moe/disqus/ ## You can visit Disqus comments in China mainland without barriers using Disqus API, e.g. https://disqus.skk.moe/disqus/
-  apikey: spsas4a0SQQLhCsyIXPIXqQFp2vBKYLpl61lSjwrqMOW8a85hGORNyh1p5I4dLi9 ## Your API key obtained in Disqus API Application, e.g. yk00ZB1fjYGRkrCrDDRYDUjpp26GJWJiJRZQZ5SY0r3th5FMW6pnSzQMnWH7ua7r
-  admin: zefanxie ## Username of your Disqus moderator, e.g. username
-  admin_label: Mod ## The text of Disqus moderator badge, e.g. Mod
+  enable: false ## If you want to use Disqus comment system, please set the value to true.
+  shortname: ## Your disqus_shortname, e.g. username
+  api: ## You can visit Disqus comments in China mainland without barriers using Disqus API, e.g. https://disqus.skk.moe/disqus/
+  apikey: ## Your API key obtained in Disqus API Application, e.g. yk00ZB1fjYGRkrCrDDRYDUjpp26GJWJiJRZQZ5SY0r3th5FMW6pnSzQMnWH7ua7r
+  admin: ## Username of your Disqus moderator, e.g. username
+  admin_label: ## The text of Disqus moderator badge, e.g. Mod
 uyan: ## Your uyan_id. e.g. 1234567
 livere: ## Your livere data-uid, e.g. MTAyMC8zMDAxOC78NTgz
 changyan: ## Your changyan appid, e.g. cyrALsXc8
@@ -20,6 +20,7 @@ valine: ## See: https://valine.js.org
   enable: false ## If you want to use Valine comment system, please set the value to true.
   appid: ## Your LeanCloud application App ID, e.g. pRBBL2JR4N7kLEGojrF0MsSs-gzGzoHsz
   appkey: ## Your LeanCloud application App Key, e.g. tjczHpDfhjYDSYddzymYK1JJ
+  serverURLs: ## If you are the "LeanCloud" in China, then this option is not mandatory to fill out. REST API Server Url" of your "LeanCloud, e.g. https://prbbl2jr.api.lncldglobal.com
   notify: false ## Mail notifier, see https://github.com/xCss/Valine/wiki/Valine-评论系统中的邮件提醒设置
   verify: false ## Validation code.
   placeholder: Just so so ## Comment box placeholders.
@@ -42,7 +43,10 @@ minivaline: ## See: https://github.com/MiniValine/MiniValine
 waline: ## See: https://waline.js.org/
   enable: false ## If you want to use Waline comment system, please set the value to true.
   serverURL: ## Your server url, e.g. https://your-domain.vercel.app
-  pageSize: ## The desired number of comments shown in each page.
+  pageSize: 30 ## The desired number of comments shown in each page.
+  wordLimit: 500 ## Limit the number of words in comments, 0 means no limit.
+  requiredMeta: ['nick','mail'] ## Required user information, e.g. ['nick','mail','link']
+  count: 5 ## The number comments displayed in the recent_comments widget, default is 10.
 utterances: ## See: https://utteranc.es
   enable: false ## If you want to use Utterances comment system, please set the value to true.
   repo: ## The repository utterances will connect to, e.g. tufu9441/comments
@@ -58,8 +62,9 @@ google_search: true ## Use Google search, true/false.
 baidu_search: false ## Use Baidu search, true/false.
 swiftype: ## Your swiftype_key, e.g. m7b11ZrsT8Me7gzApciT
 self_search: false ## Use a jQuery-based local search engine, true/false.
-google_analytics: UA-135031117-1 ## Your Google Analytics tracking id, e.g. UA-42425684-2
+google_analytics: ## Your Google Analytics tracking id, e.g. UA-42425684-2
 baidu_analytics: ## Your Baidu Analytics tracking id, e.g. 8006843039519956000
+microsoft_clarity: ## Your Microsoft Clarity tracking id, e.g. zg2ctuea9j
 fancybox: true ## If you want to use fancybox please set the value to true.
 show_category_count: false ## If you want to show the count of categories in the sidebar widget please set the value to true.
 toc_number: true ## If you want to add list number to toc please set the value to true.
@@ -93,6 +98,8 @@ copycode: true ## If you want to enable one-click copy of the code blocks, set t
 dark: false ## If you want to toggle between light/dark themes, set the value to true.
 totop: true ## If you want to use the rocketship button to return to the top, set the value to true.
 external_css: false ## If you want to load an external CSS file, set the value to true and create a file named "external.css" in the source/css folder.
+post_content_length: 180 ## Set the length of the post summary displayed on home page when no description written.
+icp: ## China mainland only, show icp info on the bottom.
 
 menu:
   - page: home
@@ -108,21 +115,45 @@ menu:
     directory: atom.xml
     icon: fa-rss
 
-widgets: ## Six widgets in sidebar provided: search, category, tag, recent_posts, recent_comments and links.
+widgets: ## Seven widgets in sidebar provided: search, info, category, tag, recent_posts, recent_comments and links.
   - search
+  - info
   - category
   - tag
   - recent_posts
   - recent_comments
-  # - links
+  - links
+
+info:
+  avatar: /img/avatar.png
+  discription: To be a better man.
+  outlinkitem:
+    - name: twitter
+      outlink: https://twitter.com/username
+      message: Twitter
+    - name: envelope
+      outlink: mailto:admin@domain.com
+      message: Email
+    - name: github
+      outlink: https://github.com/username
+      message: Github
+    - name: rss
+      outlink: /atom.xml
+      message: RSS
 
 links:
   - title: site-name1
     url: http://www.example1.com/
+    src: https://www.example1.com/favicon.ico
+    desc: XXX's Blog
   - title: site-name2
     url: http://www.example2.com/
+    src: https://www.example1.com/favicon.ico
+    desc: YYY's Blog
   - title: site-name3
     url: http://www.example3.com/
+    src: https://www.example3.com/favicon.ico
+    desc: ZZZ's Blog
 
 timeline:
   - num: 1

@@ -8,7 +8,7 @@
 
 A simple Hexo template with great performance on different devices, ported from a Typecho theme by [Cho](https://github.com/pagecho/maupassant/), forked and modified from [icylogic](https://github.com/icylogic/maupassant-hexo/).
 
-![template preview](http://ooo.0o0.ooo/2015/10/24/562b5be12177e.jpg
+![template preview](https://ooo.0o0.ooo/2015/10/24/562b5be12177e.jpg
  "Maupassant template preview")
 
 ## Installation
@@ -17,7 +17,7 @@ Install theme and renderers:
 ```shell
 $ git clone https://github.com/tufu9441/maupassant-hexo.git themes/maupassant
 $ npm install hexo-renderer-pug --save
-$ npm install hexo-renderer-sass --save
+$ npm install hexo-renderer-sass-next --save
 ```
 
 Then change your `theme` setting in `_config.yml` to `maupassant`.
@@ -70,7 +70,10 @@ minivaline: ## See: https://github.com/MiniValine/MiniValine
 waline: ## See: https://waline.js.org/
   enable: false ## If you want to use Waline comment system, please set the value to true.
   serverURL: ## Your server url, e.g. https://your-domain.vercel.app
-  pageSize: ## The desired number of comments shown in each page.
+  pageSize: 30 ## The desired number of comments shown in each page.
+  wordLimit: 500 ## Limit the number of words in comments, 0 means no limit.
+  requiredMeta: ['nick','mail'] ## Required user information, e.g. ['nick','mail','link']
+  count: 5 ## The number comments displayed in the recent_comments widget, default is 10.
 utterances: ## See: https://utteranc.es
   enable: false ## If you want to use Utterances comment system, please set the value to true.
   repo: ## The repository utterances will connect to, e.g. tufu9441/comments
@@ -88,6 +91,7 @@ swiftype: ## Your swiftype_key, e.g. m7b11ZrsT8Me7gzApciT
 self_search: false ## Use a jQuery-based local search engine, true/false.
 google_analytics: ## Your Google Analytics tracking id, e.g. UA-42425684-2
 baidu_analytics: ## Your Baidu Analytics tracking id, e.g. 8006843039519956000
+microsoft_clarity:  ## Your Microsoft Clarity tracking id, e.g. zg2ctuea9j
 fancybox: true ## If you want to use fancybox please set the value to true.
 show_category_count: false ## If you want to show the count of categories in the sidebar widget please set the value to true.
 toc_number: true ## If you want to add list number to toc please set the value to true.
@@ -121,6 +125,8 @@ copycode: true ## If you want to enable one-click copy of the code blocks, set t
 dark: false ## If you want to toggle between light/dark themes, set the value to true.
 totop: true ## If you want to use the rocketship button to return to the top, set the value to true.
 external_css: false ## If you want to load an external CSS file, set the value to true and create a file named "external.css" in the source/css folder.
+post_content_length: 180 ## Set the length of the post summary displayed on home page when no description written.
+icp: ## China mainland only, show icp info on the bottom.
 
 menu:
   - page: home
@@ -136,21 +142,45 @@ menu:
     directory: atom.xml
     icon: fa-rss
 
-widgets: ## Six widgets in sidebar provided: search, category, tag, recent_posts, recent_comments and links.
+widgets: ## Seven widgets in sidebar provided: search, info, category, tag, recent_posts, recent_comments and links.
   - search
+  - info
   - category
   - tag
   - recent_posts
   - recent_comments
   - links
 
+info:
+  avatar: /img/avatar.png
+  discription: To be a better man.
+  outlinkitem:
+    - name: twitter
+      outlink: https://twitter.com/username
+      message: Twitter
+    - name: envelope
+      outlink: mailto:admin@domain.com
+      message: Email
+    - name: github
+      outlink: https://github.com/username
+      message: Github
+    - name: rss
+      outlink: /atom.xml
+      message: RSS
+
 links:
   - title: site-name1
     url: http://www.example1.com/
+    src: https://www.example1.com/favicon.ico
+    desc: XXX's Blog
   - title: site-name2
     url: http://www.example2.com/
+    src: https://www.example1.com/favicon.ico
+    desc: YYY's Blog
   - title: site-name3
     url: http://www.example3.com/
+    src: https://www.example3.com/favicon.ico
+    desc: ZZZ's Blog
 
 timeline:
   - num: 1
@@ -184,12 +214,13 @@ version: 1.0.0
 - swiftype - [Swiftype Search](https://swiftype.com) key
 - self_search - A jQuery-based [local search engine](https://www.hahack.com/codes/local-search-engine-for-hexo/), with the dependency on the plugin [hexo-generator-search](https://github.com/wzpan/hexo-generator-search)
 - google_analytics - [Google Analytics](https://www.google.com/analytics/) tracking id
-- baidu_analytics - [Baidu Analytics](http://tongji.baidu.com) tracking id
-- fancybox - Enable [Fancybox](http://fancyapps.com/fancybox/)
+- baidu_analytics - [Baidu Analytics](https://tongji.baidu.com) tracking id
+- microsoft_clarity - [Microsoft Clarity](https://clarity.microsoft.com/) tracking id
+- fancybox - Enable [Fancybox](https://fancyapps.com/fancybox/)
 - show_category_count - Show the count of categories in the sidebar widget
 - toc_number - Show the list number of toc
 - shareto - Enable share button, with the dependency on the plugin [hexo-helper-qrcode](https://github.com/yscoder/hexo-helper-qrcode)
-- busuanzi - Enable [Busuanzi](http://busuanzi.ibruce.info) page views
+- busuanzi - Enable [Busuanzi](http://ibruce.info) page views
 - wordcount - Enable [hexo-wordcount](https://github.com/willin/hexo-wordcount) of each post
 - widgets_on_small_screens - Show the widgets at the bottom of small screens
 - canvas_nest - Enable [canvas-nest.js](https://github.com/hustcc/canvas-nest.js/blob/master/README-zh.md) dynamic background
@@ -201,9 +232,11 @@ version: 1.0.0
 - dark - Enable to toggle between light/dark modes of the theme
 - totop - Enable the rocketship to-top button
 - external_css - Enable loading an external CSS file
-- menu - Customize your menu of pages here, just follow the format of existied items. Don't forget to create corresponding folders inlcuding `index.md` in `source` folder to ensure the pages will correctly display. [FontAwesome](http://fontawesome.io) icon fonts have been integrated, and you can choose other icons which you like [here](http://fontawesome.io/icons/) and use them according to the instruction.
+- post_content_length - Abstract length of each post
+- menu - Customize your menu of pages here, just follow the format of existied items. Don't forget to create corresponding folders inlcuding `index.md` in `source` folder to ensure the pages will correctly display. [FontAwesome](https://fontawesome.com) icon fonts have been integrated, and you can choose other icons which you like [here](https://fontawesome.com/icons/) and use them according to the instruction.
 - widgets - Choose and arrange the widgets in sidebar here.
-- links - Edit your blogroll here.
+- info - Set your personal information of the info widget here.
+- links - Edit your blogroll here, and an independent blogroll page can be displayed by setting `layout: blogroll` of a page.
 - timeline - Show a timeline of the website by setting `layout: timeline` of a page.
 - Static files - Static files directory, for convenience of CDN usage.
 - Theme version - For automatic refresh of static files on CDN.
@@ -273,7 +306,7 @@ Seven languages are available for this theme currently: Simplified Chinese (zh-C
 - If you have any trouble in using this theme, please feel free to open an [issue](https://github.com/tufu9441/maupassant-hexo/issues).
 
 ## Browsers Support
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Safari | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Opera |
+| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](https://godban.github.io/browsers-support-badges/)<br/>IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](https://godban.github.io/browsers-support-badges/)<br/>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](https://godban.github.io/browsers-support-badges/)<br/>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](https://godban.github.io/browsers-support-badges/)<br/>Safari | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" />](https://godban.github.io/browsers-support-badges/)<br/>Opera |
 | --------- | --------- | --------- | --------- | --------- |
 | IE9+, Edge| last 10 versions| last 10 versions| last 7 versions| last 10 versions
 

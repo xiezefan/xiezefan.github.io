@@ -31,7 +31,7 @@ i18n_dir: :lang
 skip_render:
 
 # Writing
-new_post_name: :title.md # File name of new posts
+new_post_name: :year-:month-:day-:title.md # File name of new posts
 default_layout: post
 titlecase: false # Transform title into titlecase
 external_link:
@@ -97,7 +97,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: maupassant
+theme: NexT
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
@@ -120,3 +120,8 @@ feed:
   icon: icon.png
   autodiscovery: true
   template:
+
+# add caption for iamges
+image_caption:
+  enable: true #false to disable
+  class_name: image-caption #if you wanna customize the style for the caption,you can assign a class name, default is 'image-caption'

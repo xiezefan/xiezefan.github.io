@@ -1,7 +1,7 @@
 $(document).ready(function() {
   $('img').each(function() {
     if ($(this).parent().hasClass('fancybox')) return;
-    if ($(this).hasClass('nofancybox')) return;
+    if ($(this).parents().addBack().hasClass('nofancybox')) return;
     var alt = this.alt;
     if (alt) $(this).after('<span class="caption">' + alt + '</span>');
     $(this).wrap('<a href="' + ($(this).attr('data-src') == null ? this.src : $(this).attr('data-src')) + '" title="' + alt + '" class="fancybox"></a>');
@@ -11,9 +11,9 @@ $(document).ready(function() {
   });
 });
 $(document).ready(function() {
-  $("a[href$='.jpg'],a[href$='.png'],a[href$='.gif'],a[href$='.webp']").attr('rel', 'gallery').fancybox({
+  $("a[href$='.jpeg' i],a[href$='.jpg' i],a[href$='.png' i],a[href$='.gif' i],a[href$='.webp' i]").attr('data-fancybox', 'gallery').fancybox({
     helpers : {
-    title: { type: 'inside'}
+      title: { type: 'inside'}
     }
   });
 });
